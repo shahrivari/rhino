@@ -47,6 +47,7 @@ namespace Test
 
         static void Main(string[] args)
         {
+            Alaki.xx();
             DateTime date = DateTime.Now;
             var m = new MapRed();
             var input = new List<Tuple<string, byte>>();
