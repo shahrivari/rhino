@@ -40,14 +40,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Context.cs" />
-    <Compile Include="CumulativeSerialMapReduce.cs" />
-    <Compile Include="CuncurrentMapReduce.cs" />
+    <Compile Include="InputRecordReader.cs" />
+    <Compile Include="LineReader.cs" />
     <Compile Include="MapReduceBase.cs" />
-    <Compile Include="MultiMR.cs" />
+    <Compile Include="MapReduceContext.cs" />
+    <Compile Include="Old\Context.cs" />
+    <Compile Include="Old\CumulativeSerialMapReduce.cs" />
+    <Compile Include="Old\CuncurrentMapReduce.cs" />
+    <Compile Include="Old\MapReduceBase.cs" />
+    <Compile Include="Old\MultiMR.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Old\SerialMapReduce.cs" />
+    <Compile Include="Old\SortingMapReduce.cs" />
     <Compile Include="SerialMapReduce.cs" />
-    <Compile Include="SortingMapReduce.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -5,61 +5,91 @@ using System.Text;
 
 namespace Rhino
 {
-    public abstract class SerialMapReduce<InKey, InValue, InterKey, InterValue, OutKey, OutValue> : MapReduceBase<InKey, InValue, InterKey, InterValue, OutKey, OutValue>
+    public class SerialMapReduce<InKey, InValue, InterKey, InterValue, OutKey, OutValue> : IMapReduce<InKey, InValue, InterKey, InterValue, OutKey, OutValue>
     {
-        private List<Tuple<InKey, InValue>> input;
-        public List<Tuple<InKey, InValue>> Input
-        {
-            get { return input; }
-            set 
-            { 
-                input = value;
-                exlusiveEnd = value.Count;
+        sealed class MapContext<Key, Value> : IMapReduceContext<Key, Value>
+        {            
+            //List<KeyValuePair<Key, Value>> list;
+            Dictionary<Key, List<Value>> dic;
+
+            //public MapContext(List<KeyValuePair<Key, Value>> list) 
+            public MapContext(Dictionary<Key, List<Value>> dic) 
+            {
+                this.dic = dic;
+            }
+
+            public void Emit(Key key, Value val) 
+            {
+                if (!dic.ContainsKey(key))
+                    dic[key] = new List<Value>();
+                dic[key].Add(val);
+                //list.Add(new KeyValuePair<Key,Value>(key,val));                
             }
         }
 
-        int inclusiveStart = 0;
-        public int InclusiveStart
+        sealed class ReduceContext<Key, Value> : IMapReduceContext<Key, Value>
         {
-            get { return inclusiveStart; }
-            set { inclusiveStart = value; }
+            List<KeyValuePair<Key, Value>> list;
+
+            public ReduceContext(List<KeyValuePair<Key, Value>> list)
+            {
+                this.list = list;
+            }
+
+            public void Emit(Key key, Value val)
+            {
+                list.Add(new KeyValuePair<Key, Value>(key, val));
+            }
         }
 
 
-        int exlusiveEnd = 0;
-        public int ExlusiveEnd
+        //List<KeyValuePair<InterKey, InterValue>> intermediateList = new List<KeyValuePair<InterKey, InterValue>>(1024);
+        Dictionary<InterKey, List<InterValue>> intermediateList = new Dictionary<InterKey, List<InterValue>>();
+        List<KeyValuePair<OutKey, OutValue>> resultList = new List<KeyValuePair<OutKey, OutValue>>(1024);
+        MapContext<InterKey, InterValue> mapContext;
+        ReduceContext<OutKey, OutValue> reduceContext;
+
+        Action<InKey, InValue, IMapReduceContext<InterKey, InterValue>> mapFunc;
+        Action<InterKey, IEnumerable<InterValue>, IMapReduceContext<OutKey, OutValue>> reduceFunc; 
+
+        public void map(InKey key, InValue value, IMapReduceContext<InterKey, InterValue> context)
         {
-            get { return exlusiveEnd; }
-            set { exlusiveEnd = value; }
+            mapFunc.Invoke(key, value, mapContext); 
         }
 
-
-        Dictionary<InterKey,List<InterValue>> intermediateStore=new Dictionary<InterKey,List<InterValue>>();
-
-        List<KeyValuePair<OutKey, OutValue>> outputStore = new List<KeyValuePair<OutKey, OutValue>>();
-        public List<KeyValuePair<OutKey, OutValue>> OutputStore
+        public void reduce(InterKey key, IEnumerable<InterValue> values, IMapReduceContext<OutKey, OutValue> context)
         {
-            get { return outputStore; }
+            reduceFunc.Invoke(key, values, reduceContext);
         }
-        
+
+        InputRecordReader<InKey, InValue> input;
+
+        public SerialMapReduce(Action<InKey, InValue, IMapReduceContext<InterKey, InterValue>> mapFunc,
+                               Action<InterKey, IEnumerable<InterValue>, IMapReduceContext<OutKey, OutValue>> reduceFunc
+                               , InputRecordReader<InKey, InValue> input)
+        {
+            this.mapFunc = mapFunc;
+            this.reduceFunc = reduceFunc;
+            this.input = input;
+            mapContext = new MapContext<InterKey, InterValue>(intermediateList);
+            reduceContext = new ReduceContext<OutKey, OutValue>(resultList);
+        }
+
         public void Run()
         {
-            foreach (var tuple in input)
+            while (input.HasNextRecord())
             {
-                var result=map(tuple.Item1, tuple.Item2);
-                foreach (var r in result)
-                {
-                    if (!intermediateStore.ContainsKey(r.Key))
-                        intermediateStore.Add(r.Key, new List<InterValue>());
-                    intermediateStore[r.Key].Add(r.Value);
-                }
+                var record = input.readNextRecord();
+                map(record.Key, record.Value, mapContext);
             }
 
-            //foreach (var pair in intermediateStore)
-            //{
-            //    var result = reduce(pair.Key, pair.Value);
-            //    outputStore.Add(new KeyValuePair<OutKey, OutValue>(result.Key, result.Value));
-            //}
+            //var sorted = from pair in intermediateList orderby pair.Key select pair;
+            //sorted.Count();
+
+            foreach (var item in intermediateList)
+            {
+                reduce(item.Key, item.Value, reduceContext);
+            }
         }
 
     }

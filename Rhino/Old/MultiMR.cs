@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Text;
 
-namespace Rhino
+namespace Rhino.Old
 {
     public abstract class MultiMR<InKey, InValue, InterKey, InterValue, OutKey, OutValue> :
         MapReduceBase<InKey, InValue, InterKey, InterValue, OutKey, OutValue>

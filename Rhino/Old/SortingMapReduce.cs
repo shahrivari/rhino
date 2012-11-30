@@ -6,7 +6,7 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
 
-namespace Rhino
+namespace Rhino.Old
 {
     public abstract class SortingMapReduce<InKey, InValue, InterKey, InterValue, OutKey, OutValue> : 
         MapReduceBase<InKey, InValue, InterKey, InterValue, OutKey, OutValue>
