@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Threading;
 using Rhino;
 
 namespace Test
@@ -12,12 +13,13 @@ namespace Test
         static void Main(string[] args)
         {
             
-            LineReader reader=new LineReader(File.ReadAllText(@"c:\big.txt"));
+            LineReader reader=new LineReader(File.ReadAllText(@"c:\txt-set\pg11.txt"));
 
             DateTime t0 = DateTime.Now;
 
             Action<string,string,IMapReduceContext<string,int>> map = (mk, mv,context) => 
                 {
+                    for (int i = 0; i < 300 * 1000; i++) ;
                     var tokens = mk.Split();
                     foreach (var token in tokens)
                         context.Emit(token, 1);
@@ -29,7 +31,8 @@ namespace Test
                 };
             
             
-            SerialMapReduce<string, string, string, int, string, int> smr = new SerialMapReduce<string, string, string, int, string, int>(
+            ConcurrentMapReduce<string, string, string, int, string, int> smr = new ConcurrentMapReduce<string, string, string, int, string, int>(
+            //SerialMapReduce<string, string, string, int, string, int> smr = new SerialMapReduce<string, string, string, int, string, int>(
                 map,reduce,reader
                 );
             

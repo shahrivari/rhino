@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConcurrentMapReduce.cs" />
     <Compile Include="InputRecordReader.cs" />
     <Compile Include="LineReader.cs" />
     <Compile Include="MapReduceBase.cs" />
