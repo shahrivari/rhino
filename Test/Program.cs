@@ -10,16 +10,23 @@ namespace Test
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main1(string[] args)
         {
             
-            LineReader reader=new LineReader(File.ReadAllText(@"c:\txt-set\pg11.txt"));
+
+            List<KeyValuePair<string, string>> input = new List<KeyValuePair<string, string>>();
+
+            for (int i = 0; i < 1; i++)
+            {
+                LineReader reader = new LineReader(File.ReadAllText(@"c:\txt-set\pg11.txt"));
+                while (reader.HasNextRecord())
+                    input.Add(reader.readNextRecord());
+            }
 
             DateTime t0 = DateTime.Now;
 
             Action<string,string,IMapReduceContext<string,int>> map = (mk, mv,context) => 
                 {
-                    for (int i = 0; i < 300 * 1000; i++) ;
                     var tokens = mk.Split();
                     foreach (var token in tokens)
                         context.Emit(token, 1);
@@ -32,8 +39,8 @@ namespace Test
             
             
             ConcurrentMapReduce<string, string, string, int, string, int> smr = new ConcurrentMapReduce<string, string, string, int, string, int>(
-            //SerialMapReduce<string, string, string, int, string, int> smr = new SerialMapReduce<string, string, string, int, string, int>(
-                map,reduce,reader
+            //InMemoryMapReduce<string, string, string, int, string, int> smr = new InMemoryMapReduce<string, string, string, int, string, int>(
+                map,reduce,input
                 );
             
             smr.Run();
