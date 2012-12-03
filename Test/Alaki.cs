@@ -23,8 +23,8 @@ namespace Test
                 for (int i = range.Item1; i < range.Item2; i++)
                 {
                     //make some delay!
-                    //for (int x = 0; x < 400000; x++) ;                    
-                    
+                    //for (int x = 0; x < 40000; x++) ;
+
                     var tokens = input[i].Split();
                     foreach (var token in tokens)
                     {
@@ -37,8 +37,8 @@ namespace Test
 
         }
         
-        public static void Main(String[] args)
-        {            
+        public static void Main2(String[] args)
+        {
             StreamReader reader=new StreamReader((@"c:\txt-set\agg.txt"));
             while(true)
             {
@@ -48,7 +48,7 @@ namespace Test
                 input.Add(line);
             }
 
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 1; i++)
             {
                 var input2 = new List<string>(input);
                 input2.AddRange(input);
@@ -59,7 +59,7 @@ namespace Test
 
             
             DateTime t0 = DateTime.Now;
-            //exec(Environment.ProcessorCount);
+            exec(Environment.ProcessorCount);
             Console.WriteLine("Parallel:  " + (DateTime.Now - t0));
             t0 = DateTime.Now;
             exec(1);

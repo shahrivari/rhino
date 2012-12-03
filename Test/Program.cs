@@ -10,15 +10,15 @@ namespace Test
 {
     class Program
     {
-        static void Main1(string[] args)
+        static void Main(string[] args)
         {
             
 
             List<KeyValuePair<string, string>> input = new List<KeyValuePair<string, string>>();
 
-            for (int i = 0; i < 1; i++)
+            for (int i = 0; i < 5; i++)
             {
-                LineReader reader = new LineReader(File.ReadAllText(@"c:\txt-set\pg11.txt"));
+                LineReader reader = new LineReader(File.ReadAllText(@"c:\txt-set\agg.txt"));
                 while (reader.HasNextRecord())
                     input.Add(reader.readNextRecord());
             }
@@ -27,9 +27,11 @@ namespace Test
 
             Action<string,string,IMapReduceContext<string,int>> map = (mk, mv,context) => 
                 {
-                    var tokens = mk.Split();
-                    foreach (var token in tokens)
-                        context.Emit(token, 1);
+                    //var tokens = mk.Split();
+                    //foreach (var token in tokens)
+                    //    context.Emit(token, 1);
+                    context.Emit("len",mk.Length);
+                    //for (int i = 0; i < 10000; i++) ;
                 };
 
             Action<string, IEnumerable<int>, IMapReduceContext<string, int>> reduce = (rk, rv, context) =>
@@ -38,14 +40,22 @@ namespace Test
                 };
             
             
-            ConcurrentMapReduce<string, string, string, int, string, int> smr = new ConcurrentMapReduce<string, string, string, int, string, int>(
-            //InMemoryMapReduce<string, string, string, int, string, int> smr = new InMemoryMapReduce<string, string, string, int, string, int>(
+            ConcurrentMapReduce<string, string, string, int, string, int> cmr = new ConcurrentMapReduce<string, string, string, int, string, int>(
+                map,reduce,input
+                );
+            
+            cmr.Run();
+
+            Console.WriteLine("Parallel:  "+(DateTime.Now-t0));
+            t0 = DateTime.Now;
+            
+            InMemoryMapReduce<string, string, string, int, string, int> smr = new InMemoryMapReduce<string, string, string, int, string, int>(
                 map,reduce,input
                 );
             
             smr.Run();
 
-            Console.WriteLine("DONE:  "+(DateTime.Now-t0));
+            Console.WriteLine("Serial:  " + (DateTime.Now - t0));
             //Console.ReadLine();
         }
 
