@@ -10,8 +10,7 @@ namespace Rhino
 {
     public class ConcurrentMapReduce<InKey, InValue, InterKey, InterValue, OutKey, OutValue> : MapReduceBase<InKey, InValue, InterKey, InterValue, OutKey, OutValue>
     {
-        object lockObject=new object();
-        List<Dictionary<InterKey, List<InterValue>>> dics = new List<Dictionary<InterKey, List<InterValue>>>();
+        ConcurrentBag<Dictionary<InterKey, List<InterValue>>> dics = new ConcurrentBag<Dictionary<InterKey, List<InterValue>>>();
         List<KeyValuePair<InKey, InValue>> input;
         List<KeyValuePair<OutKey, OutValue>> resultList = new List<KeyValuePair<OutKey, OutValue>>(1024);
 
@@ -35,10 +34,7 @@ namespace Rhino
                 var context = new MapContext<InterKey, InterValue>(dic);
                 for(int i=range.Item1;i<range.Item2;i++)
                     mapFunc.Invoke(input[i].Key, input[i].Value, context);
-                lock (lockObject)
-                {
-                    dics.Add(dic);
-                }
+                dics.Add(dic);
             });
 
             var interdic = new Dictionary<InterKey, List<InterValue>>(1024);
@@ -57,7 +53,7 @@ namespace Rhino
                 reduceFunc.Invoke(pair.Key, pair.Value, reduceContext);
         }
 
-
+          
 
 
     }
