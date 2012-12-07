@@ -25,14 +25,14 @@ namespace Test
             Console.WriteLine("Parallel Started!");
             Action<string, string, IMapContext<string, int>> map = (mk, mv, context) =>
                 {
-                    var tokens = mk.Split();
-                    foreach (var token in tokens)
-                        context.Emit(token, 1);
+                    //var tokens = mk.Split();
+                    //foreach (var token in tokens)
+                    //    context.Emit(token, 1);
                     //var charArray = mk.ToCharArray();
                     //Array.Reverse(charArray);                     
                     //context.Emit(new string(charArray), mk.Length);
                     //context.Emit("len", mk.Length);
-                    //for (int i = 0; i < 10000; i++) ;
+                    for (int i = 0; i < 10000; i++) ;
                 };
 
             //Action<string, IEnumerable<int>, IMapContext<string, int>> reduce = (rk, rv, context) =>
