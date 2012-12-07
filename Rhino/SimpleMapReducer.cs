@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Collections.Concurrent;
 
 namespace Rhino
 {
     public class SimpleMapReducer<InKey, InValue, InterKey, InterValue, OutKey, OutValue>
     {
         ConcurrentMapCombiner<InKey, InValue, InterKey, InterValue> mapper;
+        BlockingCollection<Dictionary<InterKey, List<InterValue>>> dicsQ = new BlockingCollection<Dictionary<InterKey, List<InterValue>>>();
         InputRecordReader<InKey, InValue> reader;
         protected Action<InKey, InValue, IMapContext<InterKey, InterValue>> mapFunc;
         long mapCalls = 0;
@@ -23,7 +25,8 @@ namespace Rhino
         public void Run(int thread_num=0)
         {
             List<KeyValuePair<InKey, InValue>> input = new List<KeyValuePair<InKey, InValue>>();
-            int chunk_size = 256*1024;
+            
+            int chunk_size = 64*1024;
             while (reader.HasNextRecord())
             {
                 input.Clear();
@@ -36,7 +39,9 @@ namespace Rhino
                     continue;
                 DateTime t0 = DateTime.Now;
                 mapper = new ConcurrentMapCombiner<InKey, InValue, InterKey, InterValue>(mapFunc, input);
-                mapper.Run(thread_num);
+                var dics=mapper.Run(thread_num);
+
+
                 Interlocked.Add(ref mapCalls, mapper.MapCalls);
                 Interlocked.Add(ref keyCount, mapper.KeyCount);
                 if ((DateTime.Now - t0).TotalMilliseconds < 50)

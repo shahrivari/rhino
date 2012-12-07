@@ -30,16 +30,16 @@ namespace Rhino
             this.input = input;          
         }
 
-      
 
-        public void Run(int thread_num=0)
+
+        public ConcurrentBag<Dictionary<InterKey, List<InterValue>>> Run(int thread_num = 0)
         {
             dics = null;
             dics = new ConcurrentBag<Dictionary<InterKey, List<InterValue>>>();
 
             ParallelOptions option = new ParallelOptions();
             if (thread_num == 0)
-                option.MaxDegreeOfParallelism = Environment.ProcessorCount;
+                option.MaxDegreeOfParallelism = Environment.ProcessorCount*2;
             else
                 option.MaxDegreeOfParallelism = thread_num;
             Parallel.ForEach(Partitioner.Create(0, input.Count), option, (range) =>
@@ -53,6 +53,7 @@ namespace Rhino
                 Interlocked.Add(ref keyCount, context.NewKeys);
             });
 
+            return dics;
             //var interdic = new Dictionary<InterKey, List<InterValue>>(1024);
             //var reduceContext = new CombineContext<OutKey, OutValue>(resultList);
             //foreach (var dic in dics)

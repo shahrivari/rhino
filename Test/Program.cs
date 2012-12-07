@@ -13,7 +13,7 @@ namespace Test
         static void Main(string[] args)
         {
             
-            string path = @"e:\agg.txt";
+            string path = @"c:\big.txt";
             string all=File.ReadAllText(path);
             //for (int i = 0; i < 20; i++)
             //    File.AppendAllText(@"e:\big.txt", all);
