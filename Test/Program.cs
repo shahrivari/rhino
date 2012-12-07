@@ -12,52 +12,48 @@ namespace Test
     {
         static void Main(string[] args)
         {
+            
+            string path = @"e:\agg.txt";
+            string all=File.ReadAllText(path);
+            //for (int i = 0; i < 20; i++)
+            //    File.AppendAllText(@"e:\big.txt", all);
+                
+            //const string word = "the";
+
+            DateTime t0 = DateTime.Now;
+
+            Console.WriteLine("Parallel Started!");
+            Action<string, string, IMapContext<string, int>> map = (mk, mv, context) =>
+                {
+                    var tokens = mk.Split();
+                    foreach (var token in tokens)
+                        context.Emit(token, 1);
+                    //var charArray = mk.ToCharArray();
+                    //Array.Reverse(charArray);                     
+                    //context.Emit(new string(charArray), mk.Length);
+                    //context.Emit("len", mk.Length);
+                    //for (int i = 0; i < 10000; i++) ;
+                };
+
+            //Action<string, IEnumerable<int>, IMapContext<string, int>> reduce = (rk, rv, context) =>
+            //    {
+            //        context.Emit(rk, rv.Count());
+            //    };
+            
+            LineReader reader = new LineReader(all);
+            var smr = new SimpleMapReducer<string, string, string, int, string, int>(reader, map);
+            smr.Run();
+            Console.WriteLine("Parallel:  " + (DateTime.Now - t0));
+            
             //Console.ReadKey();
-            List<KeyValuePair<string, string>> input = new List<KeyValuePair<string, string>>();
-
-            for (int xx = 0; xx < 5; xx++)
-            {
-                LineReader reader = new LineReader(File.ReadAllText(@"c:\txt-set\agg.txt"));
-                input.Clear();
-                while (reader.HasNextRecord())
-                    input.Add(reader.readNextRecord());
-
-
-                DateTime t0 = DateTime.Now;
-
-                Action<string, string, IMapReduceContext<string, int>> map = (mk, mv, context) =>
-                    {
-                        var tokens = mk.Split();
-                        foreach (var token in tokens)
-                            context.Emit(token, 1);
-                        //context.Emit("len",mk.Length);
-                        //for (int i = 0; i < 10000; i++) ;
-                    };
-
-                Action<string, IEnumerable<int>, IMapReduceContext<string, int>> reduce = (rk, rv, context) =>
-                    {
-                        context.Emit(rk, rv.Count());
-                    };
-
-
-                ConcurrentMapReduce<string, string, string, int, string, int> cmr = new ConcurrentMapReduce<string, string, string, int, string, int>(
-                    map, reduce, input
-                    );
-
-                cmr.Run();
-
-                Console.WriteLine("Parallel:  " + (DateTime.Now - t0));
-                t0 = DateTime.Now;
-
-                InMemoryMapReduce<string, string, string, int, string, int> smr = new InMemoryMapReduce<string, string, string, int, string, int>(
-                    map, reduce, input
-                    );
-
-                smr.Run();
-
-                Console.WriteLine("Serial:  " + (DateTime.Now - t0));
-            }
-                //Console.ReadLine();
+            
+            Console.WriteLine("Serial Started!");
+            t0 = DateTime.Now;
+            reader = new LineReader(all);
+            smr = new SimpleMapReducer<string, string, string, int, string, int>(reader, map);
+            smr.Run(1);
+            Console.WriteLine("Serial:  " + (DateTime.Now - t0));
+            //Console.ReadLine();
         }
 
 

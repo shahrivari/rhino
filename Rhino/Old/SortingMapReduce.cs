@@ -11,7 +11,7 @@ namespace Rhino.Old
     public abstract class SortingMapReduce<InKey, InValue, InterKey, InterValue, OutKey, OutValue> : 
         MapReduceBase<InKey, InValue, InterKey, InterValue, OutKey, OutValue>
     {
-        private int chunkSize=10240;
+        //private int chunkSize=10240;
         private List<Tuple<InKey, InValue>> input;
         public  List<Tuple<InKey, InValue>> Input
         {

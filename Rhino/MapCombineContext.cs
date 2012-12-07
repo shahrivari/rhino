@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Rhino
 {
-    public interface IMapReduceContext<EmitKey,EmitVal>
+    public interface IMapContext<EmitKey,EmitVal>
     {
         void Emit(EmitKey key,EmitVal val);
     }
