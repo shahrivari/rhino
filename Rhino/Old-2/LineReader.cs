@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace Rhino
+namespace Rhino.Old
 {
     public class LineReader : InputRecordReader<string, string>
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 
-namespace Rhino
+namespace Rhino.Old
 {
     public abstract class MapCombineBase<InKey, InValue, InterKey, InterValue>
     {

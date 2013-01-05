@@ -40,11 +40,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConcurrentMapCombiner.cs" />
-    <Compile Include="InputRecordReader.cs" />
-    <Compile Include="LineReader.cs" />
-    <Compile Include="MapCombineBase.cs" />
-    <Compile Include="MapCombineContext.cs" />
+    <Compile Include="Old-2\Alaki.cs" />
+    <Compile Include="Old-2\ConcurrentMapCombiner.cs" />
+    <Compile Include="Old-2\InputRecordReader.cs" />
+    <Compile Include="Old-2\LineReader.cs" />
+    <Compile Include="Old-2\MapCombineBase.cs" />
+    <Compile Include="Old-2\MapCombineContext.cs" />
+    <Compile Include="Old-2\Program.cs" />
     <Compile Include="Old\Context.cs" />
     <Compile Include="Old\CumulativeSerialMapReduce.cs" />
     <Compile Include="Old\CuncurrentMapReduce.cs" />
@@ -54,7 +56,7 @@
     <Compile Include="Old\SerialMapReduce.cs" />
     <Compile Include="Old\SortingMapReduce.cs" />
     <Compile Include="Old\ALakiSerialMapReduce.cs" />
-    <Compile Include="SimpleMapReducer.cs" />
+    <Compile Include="Old-2\SimpleMapReducer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

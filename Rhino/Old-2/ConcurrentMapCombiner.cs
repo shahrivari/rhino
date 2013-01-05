@@ -6,7 +6,7 @@ using System.Threading;
 using System.Linq;
 using System.Text;
 
-namespace Rhino
+namespace Rhino.Old
 {
     public class ConcurrentMapCombiner<InKey, InValue, InterKey, InterValue> : MapCombineBase<InKey, InValue, InterKey, InterValue>
     {
