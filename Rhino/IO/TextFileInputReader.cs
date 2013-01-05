@@ -35,9 +35,9 @@ namespace Rhino.IO
             return null;                        
         }
 
-        public override int ReadRecords(out ICollection<string> records, int count)
+        public override List<string> ReadRecords(int count)
         {
-            records=new List<string>();
+            var records=new List<string>();
             for (int i = 0; i < count; i++)
             {
                 string next_record=ReadRecord();
@@ -47,7 +47,28 @@ namespace Rhino.IO
                     records.Add(next_record);
             }
 
-            return records.Count;
+            return records;
+        }
+
+        public override int ReadRecordsChars(out List<string> records, int max_char_count)
+        {
+            records = new List<string>();
+            int char_count = 0;
+            while(true)
+            {
+                string next_record = ReadRecord();
+                if (next_record == null)
+                    break;
+                else
+                    records.Add(next_record);
+                
+                char_count += next_record.Length;
+                if (char_count >= max_char_count)
+                    break;
+
+            }
+
+            return char_count;
         }
 
     }

@@ -40,9 +40,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IO\InputReader.cs" />
     <Compile Include="MapRed\MapContext.cs" />
-    <Compile Include="MapRed\MapperBase.cs" />
+    <Compile Include="MapRed\TextMapper.cs" />
     <Compile Include="Old-2\Alaki.cs" />
     <Compile Include="Old-2\ConcurrentMapCombiner.cs" />
     <Compile Include="Old-2\InputRecordReader.cs" />
