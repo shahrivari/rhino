@@ -50,9 +50,9 @@ namespace Rhino.IO
             return records;
         }
 
-        public override int ReadRecordsChars(out List<string> records, int max_char_count)
+        public override int ReadChunk(out InputTextCunk chunk, int max_char_count)
         {
-            records = new List<string>();
+            var records = new List<string>();
             int char_count = 0;
             while(true)
             {
@@ -68,6 +68,7 @@ namespace Rhino.IO
 
             }
 
+            chunk = new InputTextCunk(records, char_count);
             return char_count;
         }
 

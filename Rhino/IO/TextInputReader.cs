@@ -11,6 +11,6 @@ namespace Rhino.IO
 
         public abstract string ReadRecord();
         public abstract List<string> ReadRecords(int count);
-        public abstract int ReadRecordsChars(out List<string> records, int max_char_count);
+        public abstract int ReadChunk(out InputTextCunk chunk, int max_char_count);
     }
 }

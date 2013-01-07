@@ -44,8 +44,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IO\InputTextCunk.cs" />
+    <Compile Include="IO\Serializer.cs" />
     <Compile Include="MapRed\MapContext.cs" />
     <Compile Include="MapRed\TextMapper.cs" />
+    <Compile Include="MapRed\TextMapperInfo.cs" />
     <Compile Include="Old-2\Alaki.cs" />
     <Compile Include="Old-2\ConcurrentMapCombiner.cs" />
     <Compile Include="Old-2\InputRecordReader.cs" />
@@ -65,13 +68,13 @@
     <Compile Include="Old-2\SimpleMapReducer.cs" />
     <Compile Include="IO\TextFileInputReader.cs" />
     <Compile Include="IO\TextInputReader.cs" />
+    <Compile Include="Util\StringFormatter.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Util\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
