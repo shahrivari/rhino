@@ -7,7 +7,7 @@ namespace Rhino.Util
 {
     public class StringFormatter
     {
-        public static string HumanReadable(double val)
+        public static string HumanReadablePostfixs(double val)
         {
             string[] sizes = { "", "Kilo", "Mega", "Giga" };
             int order = 0;

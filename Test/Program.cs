@@ -14,12 +14,20 @@ namespace Test
     {
         static void Main(string[] args)
         {
-            int x = 0;
-            var bytes = Serializer.GetBinarySerializer(typeof(int)).Invoke(x);
+            float x = 1000;
+            var serializer = Serializer.GetBinarySerializer(typeof(float));
+            var bytes=serializer.Invoke(x);
             var watch = new System.Diagnostics.Stopwatch();
             watch.Start();
             TextFileInputReader reader = new TextFileInputReader(@"X:\alaki\BIN_NORM_20_10M.csv");
-            TextMapper<int, int> mapper = new TextMapper<int, int>(reader, (s, context) => { context.Emit(1, s.Length);/*for (int i = 0; i < 1000; i++);*/ });
+            var mapper = new TextMapper<string, int>(reader, 
+                (s, context) => 
+                {
+                    foreach(var token in s.Split())
+                        context.Emit(token, 1);
+                    /*for (int i = 0; i < 1000; i++);*/ 
+                } 
+                ,(list) => { return list.Sum(); });
             mapper.Run();
             watch.Stop();
             Console.WriteLine(watch.Elapsed);
