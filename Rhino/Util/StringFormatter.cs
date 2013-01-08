@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+
 namespace Rhino.Util
 {
     public class StringFormatter
@@ -19,6 +20,11 @@ namespace Rhino.Util
             // Adjust the format string to your preferences. For example "{0:0.#}{1}" would
             // show a single decimal place, and no space.
             return String.Format("{0:0.##} {1}", val, sizes[order]);
+        }
+
+        public static string DigitGrouped(long val)
+        {
+            return val.ToString("N");
         }
     }
 }

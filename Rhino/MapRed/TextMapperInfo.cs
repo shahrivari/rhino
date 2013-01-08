@@ -10,5 +10,7 @@ namespace Rhino.MapRed
         public long MapEmits = 0;
         public long ProcessedRecords = 0;
         public long ProcessedChars = 0;
+        public long SpilledBytes = 0;
+        public long SpilledRecords = 0;
     }
 }

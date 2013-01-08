@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IO\InputTextCunk.cs" />
+    <Compile Include="IO\IntermediateFile.cs" />
     <Compile Include="IO\IntermediateRecord.cs" />
     <Compile Include="IO\Serializer.cs" />
     <Compile Include="MapRed\MapContext.cs" />
