@@ -24,13 +24,13 @@ namespace Test
 
             var watch = new System.Diagnostics.Stopwatch();
             watch.Start();
-            TextFileInputReader reader = new TextFileInputReader(@"X:\alaki\BIN_NORM_20_10M.csv");
+            TextFileInputReader reader = new TextFileInputReader(@"C:\txt-set\agg.txt");
             var mapper = new TextMapper<string, int>(reader, 
                 (s, context) => 
                 {
-                    //foreach (var token in s.Split())
-                    //    context.Emit(token, 1);
-                    context.Emit("length", s.Length);
+                    foreach (var token in s.Split())
+                        context.Emit(token, 1);
+                    //context.Emit("length", s.Length);
                     /*for (int i = 0; i < 1000; i++);*/ 
                 } 
                 ,(list) => { return list.Sum(); });
