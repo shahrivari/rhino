@@ -20,7 +20,7 @@ namespace Rhino.MapRed
         protected TextInputReader reader;
         private Object diskLock=new object();
 
-        private string tempDirectory = @"c:\pashm";
+        private string tempDirectory = @"z:\pashm";
         
         protected int maxChunkSize = 4 * 1024 * 1024;
         TimeSpan minWorkPeriod = new TimeSpan(0, 0, 0, 0, 100);
@@ -41,9 +41,7 @@ namespace Rhino.MapRed
             get { return mapperInfo; }
         }
 
-        //ConcurrentBag<Dictionary<InterKey, List<InterValue>>> dics=new ConcurrentBag<Dictionary<InterKey,List<InterValue>>>();
         BlockingCollection<Dictionary<InterKey, List<InterValue>>> dicsQ = new BlockingCollection<Dictionary<InterKey, List<InterValue>>>(100);
-
         BlockingCollection<InputTextCunk> inputQ = new BlockingCollection<InputTextCunk>(4);
 
         public TextMapper(TextInputReader reader, Action<string, MapContext<InterKey, InterValue>> map_func, Func<List<InterValue>, InterValue> combine_func = null)
@@ -142,24 +140,6 @@ namespace Rhino.MapRed
                 doSpillIfNeeded();
             }
             doSpillIfNeeded(true);
-            //if(cumulativeDictionary.Count>0)
-            //{
-            //    watch.Restart();
-            //    var sorted_pairs = cumulativeDictionary.AsParallel().OrderBy(t => t.Key).ToArray();
-            //    cumulativeDictionary = new Dictionary<InterKey, List<InterValue>>();
-            //    cumulativeDicPairCount = 0;
-            //    mapperInfo.SpilledRecords += sorted_pairs.Count();
-            //    watch.Stop();
-            //    logger.Debug("Sorted {0} records in {1}.", StringFormatter.DigitGrouped(sorted_pairs.Count()), watch.Elapsed);
-            //    IntermediateFile<InterKey, InterValue> inter_file = new IntermediateFile<InterKey, InterValue>(tempDirectory);
-            //    int written_bytes = 0;
-            //    lock (diskLock)
-            //    {
-            //        written_bytes = inter_file.WriteRecords(sorted_pairs);
-            //    }
-            //    mapperInfo.SpilledBytes += written_bytes;
-            //    logger.Debug("Finally spilling done in {0}.", watch.Elapsed);
-            //}       
         }
 
 
@@ -172,10 +152,9 @@ namespace Rhino.MapRed
             watch.Restart();
             var dics = new ConcurrentBag<Dictionary<InterKey, List<InterValue>>>();
             ParallelOptions option = new ParallelOptions();
-            if (thread_num == 0)
-                option.MaxDegreeOfParallelism = Environment.ProcessorCount * 2;
-            else
+            if (thread_num != 0)
                 option.MaxDegreeOfParallelism = thread_num;
+
             Parallel.ForEach(Partitioner.Create(0, input_records.Count), option, (range) =>
             {
                 var dic = new Dictionary<InterKey, List<InterValue>>();
@@ -213,11 +192,21 @@ namespace Rhino.MapRed
             dicsQ.CompleteAdding();
             logger.Info("Mapper processed {0} records that sums to {1} chars.", StringFormatter.DigitGrouped(mapperInfo.ProcessedRecords), StringFormatter.HumanReadablePostfixs(mapperInfo.ProcessedChars));
         }
+
+        Stopwatch mapperWatch = new Stopwatch();
+
+        private void logCompletionInfo()
+        {
+            logger.Info("Mapper finished the job in {0}!", mapperWatch.Elapsed);
+            logger.Info("Mapper mapped {0} records that sums to {1} chars.", StringFormatter.DigitGrouped(mapperInfo.ProcessedRecords), StringFormatter.HumanReadablePostfixs(mapperInfo.ProcessedChars));
+            logger.Info("Mapper emmited {0} pairs.", StringFormatter.DigitGrouped(mapperInfo.MapEmits));
+            logger.Info("Mapper spilled {0} records that sums to {1} bytes.", StringFormatter.DigitGrouped(mapperInfo.SpilledRecords), StringFormatter.HumanReadablePostfixs(mapperInfo.SpilledBytes));
+        }
+
         
         public void Run()
-        {
-            Stopwatch watch = new Stopwatch();
-            watch.Restart();
+        {            
+            mapperWatch.Restart();
 
             Thread input_reader_thread = new Thread(new ThreadStart(readInput));
             input_reader_thread.Start();
@@ -228,25 +217,19 @@ namespace Rhino.MapRed
             consumeInput();
             input_reader_thread.Join();
             combiner_thread.Join();
-            watch.Stop();
-            logger.Info("Mapper finished the job in {0}!",watch.Elapsed);
-            logger.Info("Mapper mapped {0} records that sums to {1} chars.", StringFormatter.DigitGrouped(mapperInfo.ProcessedRecords), StringFormatter.HumanReadablePostfixs(mapperInfo.ProcessedChars));
-            logger.Info("Mapper emmited {0} pairs.", StringFormatter.DigitGrouped(mapperInfo.MapEmits));
-            logger.Info("Mapper spilled {0} records that sums to {1} bytes.", StringFormatter.DigitGrouped(mapperInfo.SpilledRecords), StringFormatter.HumanReadablePostfixs(mapperInfo.SpilledBytes));
+            mapperWatch.Stop();
+            logCompletionInfo();
         }
 
         public void SequentialRun()
-        {
-            Stopwatch watch = new Stopwatch();
-            watch.Start();
+        {            
+            mapperWatch.Start();
             while (true)
             {
                 InputTextCunk input_chunk;
                 int char_count = 0;
-                lock (diskLock)
-                {
-                    char_count = reader.ReadChunk(out input_chunk, maxChunkSize);
-                }
+
+                char_count = reader.ReadChunk(out input_chunk, maxChunkSize);
                 if (char_count == 0)
                     break;
                 
@@ -259,11 +242,8 @@ namespace Rhino.MapRed
                 }                
             }
             doSpillIfNeeded(true);
-            watch.Stop();
-            logger.Info("Mapper finished the job in {0}!", watch.Elapsed);
-            logger.Info("Mapper mapped {0} records that sums to {1} chars.", StringFormatter.DigitGrouped(mapperInfo.ProcessedRecords), StringFormatter.HumanReadablePostfixs(mapperInfo.ProcessedChars));
-            logger.Info("Mapper emmited {0} pairs.", StringFormatter.DigitGrouped(mapperInfo.MapEmits));
-            logger.Info("Mapper spilled {0} records that sums to {1} bytes.", StringFormatter.DigitGrouped(mapperInfo.SpilledRecords), StringFormatter.HumanReadablePostfixs(mapperInfo.SpilledBytes));
+            mapperWatch.Stop();
+            logCompletionInfo();
         }
     }
 }

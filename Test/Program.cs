@@ -24,17 +24,17 @@ namespace Test
 
             var watch = new System.Diagnostics.Stopwatch();
             watch.Start();
-            TextFileInputReader reader = new TextFileInputReader(@"C:\big.txt");
+            TextFileInputReader reader = new TextFileInputReader(@"X:\alaki\BIN_NORM_20_50M.csv");
             var mapper = new TextMapper<string, int>(reader, 
                 (s, context) => 
                 {
                     //foreach (var token in s.Split())
-                      //  context.Emit(token, 1);
+                        //context.Emit(token, 1);
                     context.Emit("length", s.Length);
-                    /*for (int i = 0; i < 1000; i++);*/ 
+                    //for (int i = 0; i < 1000; i++);
                 } 
                 ,(list) => { return list.Sum(); });
-            mapper.Run();
+            mapper.SequentialRun();
             watch.Stop();
             Console.WriteLine(watch.Elapsed);
         }            
