@@ -14,6 +14,7 @@ namespace Test
     {
         static void Main(string[] args)
         {
+            Serializer.RegisterBasicTypes();
             var serializer = Serializer.GetBinarySerializer(typeof(int));            
             var record1 = new SmallRecord(serializer.Invoke(100));
             var record2 = new SmallRecord(serializer.Invoke(256));
@@ -24,14 +25,14 @@ namespace Test
 
             var watch = new System.Diagnostics.Stopwatch();
             watch.Start();
-            TextFileInputReader reader = new TextFileInputReader(@"X:\alaki\BIN_NORM_20_50M.csv");
+            TextFileInputReader reader = new TextFileInputReader(@"X:\alaki\BIN_NORM_20_10M.csv");
             var mapper = new TextMapper<string, int>(reader, 
                 (s, context) => 
                 {
                     //foreach (var token in s.Split())
                         //context.Emit(token, 1);
                     context.Emit("length", s.Length);
-                    //for (int i = 0; i < 1000; i++);
+                    //for (int i = 0; i < 20000; i++);
                 } 
                 ,(list) => { return list.Sum(); });
             mapper.SequentialRun();

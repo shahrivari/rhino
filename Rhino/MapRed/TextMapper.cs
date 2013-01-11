@@ -19,6 +19,12 @@ namespace Rhino.MapRed
         protected Func<List<InterValue>, InterValue> combineFunc = null;
         protected TextInputReader reader;
         private Object diskLock=new object();
+        
+        private Guid mapperID;
+        public Guid MapperID
+        {
+            get { return mapperID; }
+        }
 
         private string tempDirectory = @"z:\pashm";
         
@@ -49,6 +55,7 @@ namespace Rhino.MapRed
             this.reader = reader;
             mapFunc = map_func;
             combineFunc = combine_func;
+            mapperID = new Guid();
             logger.Info("Mapper created.");
         }
 
@@ -83,14 +90,14 @@ namespace Rhino.MapRed
                 mapperInfo.SpilledRecords += sorted_pairs.Count();
                 watch.Stop();
                 logger.Debug("Sorted {0} records in {1}.", StringFormatter.DigitGrouped(sorted_pairs.Count()), watch.Elapsed);
-                IntermediateFile<InterKey, InterValue> inter_file = new IntermediateFile<InterKey, InterValue>(tempDirectory);
+                IntermediateFile<InterKey, InterValue> inter_file = new IntermediateFile<InterKey, InterValue>(tempDirectory,mapperID);
                 int written_bytes = 0;
                 lock (diskLock)
                 {
                     written_bytes = inter_file.WriteRecords(sorted_pairs);
                 }
                 mapperInfo.SpilledBytes += written_bytes;
-                if (!final_spill)
+                if (!final_spill&&written_bytes>0)
                 {
                     if (written_bytes < maxIntermediateFileSize)
                     {
@@ -204,7 +211,7 @@ namespace Rhino.MapRed
         }
 
         
-        public void Run()
+        public void Run(int thread_num=0)
         {            
             mapperWatch.Restart();
 
@@ -214,7 +221,7 @@ namespace Rhino.MapRed
             combiner_thread.Start();            
 
             //readInput();
-            consumeInput();
+            consumeInput(thread_num);
             input_reader_thread.Join();
             combiner_thread.Join();
             mapperWatch.Stop();

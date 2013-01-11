@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using Rhino.Util;
 
 namespace Rhino.IO
 {
@@ -11,7 +12,9 @@ namespace Rhino.IO
         static Dictionary<Type, Func<object, byte[]>> binarySerializers = new Dictionary<Type, Func<object, byte[]>>();
         static Dictionary<Type, Func<byte[],int, object>> binaryDeserializers = new Dictionary<Type, Func<byte[],int, object>>();
 
-        static Serializer()
+
+
+        public static void RegisterBasicTypes()
         {
             //serializers for basic types
             binarySerializers.Add(typeof(bool), (val) => { return BitConverter.GetBytes((bool)val).Reverse().ToArray(); });
@@ -79,7 +82,7 @@ namespace Rhino.IO
             return new SmallRecord(bytes);
         }
 
-        public static SmallRecord BinarySerializeListToSmallRecord<T>(IEnumerable<T> list)
+        public static byte[] BinarySerializeIntermediateList<T>(IEnumerable<T> list)
         {
             var serializer = GetBinarySerializer(typeof(T));
             List<byte> byte_seq = new List<byte>();
@@ -90,7 +93,9 @@ namespace Rhino.IO
                 byte_seq.AddRange(small_record.Bytes);
                 //stream.Write(small_record.Bytes, 0, small_record.Bytes.Length);
             }
-            return new SmallRecord(byte_seq.ToArray());
+
+            var result = ArrayUtils.Combine(BitConverter.GetBytes(byte_seq.Count), byte_seq.ToArray());
+            return result;
             //return new SmallRecord(stream.ToArray());
         }
 
