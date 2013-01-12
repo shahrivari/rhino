@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Rhino.IO
+namespace Rhino.IO.Records
 {
-    public class SmallRecord: IComparable
+    public class SmallRecord : IComparable
     {
         static int maxLength = 256 * 1024 * 1024;
         public static int MaxLength
@@ -18,7 +18,7 @@ namespace Rhino.IO
         byte[] bytes;
         public byte[] Bytes
         {
-          get { return bytes; }
+            get { return bytes; }
         }
 
         public int Length
@@ -30,7 +30,7 @@ namespace Rhino.IO
         {
             if (obj.Length > maxLength)
                 throw new ArgumentException("Object length(" + obj.Length + ") is bigger than the default max(" + MaxLength + ").");
-            var len_bytes=BitConverter.GetBytes(obj.Length);
+            var len_bytes = BitConverter.GetBytes(obj.Length);
             bytes = new byte[obj.Length + len_bytes.Length];
             Buffer.BlockCopy(len_bytes, 0, bytes, 0, len_bytes.Length);
             Buffer.BlockCopy(obj, 0, bytes, len_bytes.Length, obj.Length);
@@ -41,8 +41,8 @@ namespace Rhino.IO
             if (obj == null) return 1;
 
             SmallRecord other_record = obj as SmallRecord;
-            int index=0;
-            int last=Math.Min(this.Bytes.Length,other_record.Bytes.Length);
+            int index = 0;
+            int last = Math.Min(this.Bytes.Length, other_record.Bytes.Length);
 
             if (other_record != null)
             {
@@ -64,29 +64,6 @@ namespace Rhino.IO
             }
             else
                 throw new ArgumentException("Object is not a SmallRecord");
-        }
-    }
-
-
-    public class ListRecord
-    {
- 
-    }
-
-    public class LargeRecord
-    {
-        byte[] bytes;
-        public byte[] Bytes
-        {
-          get { return bytes; }
-        }
-
-        public LargeRecord(byte[] obj)
-        {
-            var len_bytes=BitConverter.GetBytes(obj.LongLength);
-            bytes = new byte[obj.Length + len_bytes.Length];
-            Buffer.BlockCopy(len_bytes, 0, bytes, 0, len_bytes.Length);
-            Buffer.BlockCopy(obj, 0, bytes, len_bytes.Length, obj.Length);
         }
     }
 }

@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using Rhino.Util;
+using Rhino.IO.Records;
 
 namespace Rhino.IO
 {
-    public static class Serializer
+    public static class Serialization
     {
         static Dictionary<Type, Func<object, byte[]>> binarySerializers = new Dictionary<Type, Func<object, byte[]>>();
         static Dictionary<Type, Func<byte[],int, object>> binaryDeserializers = new Dictionary<Type, Func<byte[],int, object>>();
@@ -98,6 +99,8 @@ namespace Rhino.IO
             return result;
             //return new SmallRecord(stream.ToArray());
         }
+
+
 
     }
 }

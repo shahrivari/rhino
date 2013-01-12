@@ -21,6 +21,22 @@ namespace Rhino.IO
             }
         }
 
+        public override long Length
+        {
+            get 
+            {
+                return reader.BaseStream.Length;
+            }
+        }
+
+        public override long Position
+        {
+            get
+            {
+                return reader.BaseStream.Position;
+            }
+        }
+
         public TextFileInputReader(string file_path)
         {
             filePath = file_path;
@@ -65,7 +81,6 @@ namespace Rhino.IO
                 char_count += next_record.Length;
                 if (char_count >= max_char_count)
                     break;
-
             }
 
             chunk = new InputTextCunk(records, char_count);

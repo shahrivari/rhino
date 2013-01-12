@@ -28,15 +28,11 @@ namespace Rhino.MapRed
 
         private string tempDirectory = @"z:\pashm";
         
-        protected int maxChunkSize = 4 * 1024 * 1024;
+        protected int maxChunkSize = 64 * 1024;
         TimeSpan minWorkPeriod = new TimeSpan(0, 0, 0, 0, 100);
-        TimeSpan maxWorkPeriod = new TimeSpan(0, 0, 0, 0, 300);
+        TimeSpan maxWorkPeriod = new TimeSpan(0, 0, 0, 0, 250);
         int maxCharsToMap = 32 * 1024 * 1024;
-        int maxIntermediatePairsToSpill = 512 * 1024;
-        int maxIntermediateFileSize = 256 * 1024 * 1024;
-
-        Dictionary<InterKey, List<InterValue>> cumulativeDictionary = new Dictionary<InterKey, List<InterValue>>(1024);
-        int cumulativeDicPairCount = 0;
+        InMemoryCombineStore<InterKey, InterValue> combineStore ;
 
 
         private static Logger logger = LogManager.GetCurrentClassLogger();
@@ -55,7 +51,8 @@ namespace Rhino.MapRed
             this.reader = reader;
             mapFunc = map_func;
             combineFunc = combine_func;
-            mapperID = new Guid();
+            mapperID = Guid.NewGuid();
+            combineStore = new InMemoryCombineStore<InterKey, InterValue>(mapperID,mapperInfo, tempDirectory,combineFunc);
             logger.Info("Mapper created.");
         }
 
@@ -78,63 +75,6 @@ namespace Rhino.MapRed
             inputQ.CompleteAdding();
         }
 
-        private void doSpillIfNeeded(bool final_spill=false)
-        {            
-            if (cumulativeDictionary.Count>0 && (cumulativeDicPairCount > maxIntermediatePairsToSpill || final_spill))
-            {
-                Stopwatch watch = new Stopwatch();
-                watch.Restart();
-                var sorted_pairs = cumulativeDictionary.AsParallel().OrderBy(t => t.Key).ToArray();
-                cumulativeDictionary = new Dictionary<InterKey, List<InterValue>>();
-                cumulativeDicPairCount = 0;
-                mapperInfo.SpilledRecords += sorted_pairs.Count();
-                watch.Stop();
-                logger.Debug("Sorted {0} records in {1}.", StringFormatter.DigitGrouped(sorted_pairs.Count()), watch.Elapsed);
-                IntermediateFile<InterKey, InterValue> inter_file = new IntermediateFile<InterKey, InterValue>(tempDirectory,mapperID);
-                int written_bytes = 0;
-                lock (diskLock)
-                {
-                    written_bytes = inter_file.WriteRecords(sorted_pairs);
-                }
-                mapperInfo.SpilledBytes += written_bytes;
-                if (!final_spill&&written_bytes>0)
-                {
-                    if (written_bytes < maxIntermediateFileSize)
-                    {
-                        maxIntermediatePairsToSpill = (int)(maxIntermediatePairsToSpill * (double)(maxIntermediateFileSize) / written_bytes);
-                        logger.Debug("maxIntermediatePairsToSpill was set to {0} records.", StringFormatter.DigitGrouped(maxIntermediatePairsToSpill));
-                    }
-                    if (written_bytes > 1.5 * maxIntermediateFileSize)
-                    {
-                        maxIntermediatePairsToSpill /= 2;
-                        logger.Debug("maxIntermediatePairsToSpill was set to {0} records.", StringFormatter.DigitGrouped(maxIntermediatePairsToSpill));
-                    }
-                }
-            }
-        }
-
-        private void doCombine(Dictionary<InterKey, List<InterValue>> dic)
-        {
-            foreach (var pair in dic)
-            {
-                List<InterValue> intermediate_list = null;
-                if (!cumulativeDictionary.TryGetValue(pair.Key, out intermediate_list))
-                {
-                    intermediate_list = new List<InterValue>();
-                    cumulativeDictionary[pair.Key] = intermediate_list;
-                }
-
-                var new_list = pair.Value;
-                intermediate_list.AddRange(new_list);
-                cumulativeDicPairCount += new_list.Count;
-
-                if (intermediate_list.Count > 4 && combineFunc != null)
-                {
-                    cumulativeDictionary[pair.Key] = new List<InterValue>() { combineFunc.Invoke(intermediate_list) };
-                    cumulativeDicPairCount -= intermediate_list.Count - 1;
-                }
-            }
-        }
 
         private void combine()
         {            
@@ -143,10 +83,11 @@ namespace Rhino.MapRed
             while (!dicsQ.IsCompleted)
             {
                 var dic = dicsQ.Take();
-                doCombine(dic);
-                doSpillIfNeeded();
+                //doCombine(dic);
+                combineStore.Add(dic);
+                combineStore.doSpillIfNeeded();
             }
-            doSpillIfNeeded(true);
+            combineStore.doSpillIfNeeded(true);
         }
 
 
@@ -228,7 +169,7 @@ namespace Rhino.MapRed
             logCompletionInfo();
         }
 
-        public void SequentialRun()
+        public void SequentialRun(int thread_num = 0)
         {            
             mapperWatch.Start();
             while (true)
@@ -240,15 +181,16 @@ namespace Rhino.MapRed
                 if (char_count == 0)
                     break;
                 
-                logger.Debug("Read a chunk: {0} records and {1} chars. InputQ count is {2}", StringFormatter.DigitGrouped(input_chunk.CharCount), StringFormatter.HumanReadablePostfixs(char_count), inputQ.Count);
-                var dics=doMap(input_chunk);
+                logger.Info("File percentage consumed: {3}%.  Read a chunk: {0} records and {1} chars. InputQ count is {2}", StringFormatter.DigitGrouped(input_chunk.CharCount), StringFormatter.HumanReadablePostfixs(char_count), inputQ.Count,(100*reader.Position)/reader.Length);
+                var dics=doMap(input_chunk,thread_num);
                 foreach (var dic in dics)
                 {
-                    doCombine(dic);
-                    doSpillIfNeeded();
+                    //doCombine(dic);
+                    combineStore.Add(dic);
+                    combineStore.doSpillIfNeeded(false,thread_num);
                 }                
             }
-            doSpillIfNeeded(true);
+            combineStore.doSpillIfNeeded(true,thread_num);
             mapperWatch.Stop();
             logCompletionInfo();
         }

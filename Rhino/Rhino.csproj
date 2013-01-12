@@ -46,9 +46,11 @@
   <ItemGroup>
     <Compile Include="IO\InputTextCunk.cs" />
     <Compile Include="IO\IntermediateFile.cs" />
-    <Compile Include="IO\IntermediateRecord.cs" />
-    <Compile Include="IO\Records\KeyPositionRecord.cs" />
+    <Compile Include="IO\IntermediateFileMerger.cs" />
+    <Compile Include="IO\Records\IntermediateRecord.cs" />
+    <Compile Include="IO\Records\SmallRecord.cs" />
     <Compile Include="IO\Serializer.cs" />
+    <Compile Include="MapRed\InMemoryCombineStore.cs" />
     <Compile Include="MapRed\MapContext.cs" />
     <Compile Include="MapRed\TextMapper.cs" />
     <Compile Include="MapRed\TextMapperInfo.cs" />
@@ -73,6 +75,8 @@
     <Compile Include="IO\TextInputReader.cs" />
     <Compile Include="Util\ArrayUtils.cs" />
     <Compile Include="Util\ParallelSort.cs" />
+    <Compile Include="Util\PriorityQueue.cs" />
+    <Compile Include="Util\StreamUtils.cs" />
     <Compile Include="Util\StringFormatter.cs" />
   </ItemGroup>
   <ItemGroup />
