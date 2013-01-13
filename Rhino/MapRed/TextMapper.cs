@@ -15,8 +15,21 @@ namespace Rhino.MapRed
 {
     public class TextMapper<InterKey, InterValue>
     {
-        protected Action<string, MapContext<InterKey, InterValue>> mapFunc = null;
-        protected Func<List<InterValue>, InterValue> combineFunc = null;
+        private Action<string, MapContext<InterKey, InterValue>> mapFunc = null;
+        public Action<string, MapContext<InterKey, InterValue>> MapFunc
+        {
+            get { return mapFunc; }
+            set { mapFunc = value; }
+        }
+
+        private Func<List<InterValue>, InterValue> combineFunc = null;
+
+        public Func<List<InterValue>, InterValue> CombineFunc
+        {
+            get { return combineFunc; }
+            set { combineFunc = value; }
+        }
+
         protected TextInputReader reader;
         private Object diskLock=new object();
         
@@ -26,7 +39,7 @@ namespace Rhino.MapRed
             get { return mapperID; }
         }
 
-        private string tempDirectory = @"z:\pashm";
+        private string workingDirectory = @"z:\pashm";
         
         protected int maxChunkSize = 64 * 1024;
         TimeSpan minWorkPeriod = new TimeSpan(0, 0, 0, 0, 100);
@@ -46,14 +59,19 @@ namespace Rhino.MapRed
         BlockingCollection<Dictionary<InterKey, List<InterValue>>> dicsQ = new BlockingCollection<Dictionary<InterKey, List<InterValue>>>(100);
         BlockingCollection<InputTextCunk> inputQ = new BlockingCollection<InputTextCunk>(4);
 
-        public TextMapper(TextInputReader reader, Action<string, MapContext<InterKey, InterValue>> map_func, Func<List<InterValue>, InterValue> combine_func = null)
+        public TextMapper(TextInputReader reader, string working_directory, Action<string, MapContext<InterKey, InterValue>> map_func=null, Func<List<InterValue>, InterValue> combine_func = null)
         {
             this.reader = reader;
             mapFunc = map_func;
             combineFunc = combine_func;
-            mapperID = Guid.NewGuid();
-            combineStore = new InMemoryCombineStore<InterKey, InterValue>(mapperID,mapperInfo, tempDirectory,combineFunc);
+            workingDirectory = working_directory;
             logger.Info("Mapper created.");
+        }
+
+        private void init()
+        {
+            mapperID = Guid.NewGuid();
+            combineStore = new InMemoryCombineStore<InterKey, InterValue>(mapperID, mapperInfo, workingDirectory, combineFunc);
         }
 
         private void readInput()
@@ -153,7 +171,8 @@ namespace Rhino.MapRed
 
         
         public void Run(int thread_num=0)
-        {            
+        {
+            init();
             mapperWatch.Restart();
 
             Thread input_reader_thread = new Thread(new ThreadStart(readInput));
@@ -170,7 +189,8 @@ namespace Rhino.MapRed
         }
 
         public void SequentialRun(int thread_num = 0)
-        {            
+        {
+            init();
             mapperWatch.Start();
             while (true)
             {

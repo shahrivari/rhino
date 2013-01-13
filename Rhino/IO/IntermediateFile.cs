@@ -16,7 +16,7 @@ namespace Rhino.IO
     {
         static int created_files = 0;
 
-        Guid mapperID;
+        //Guid mapperID;
         string path;
         public string Path
         {
@@ -24,19 +24,36 @@ namespace Rhino.IO
         }
         
         private static Logger logger = LogManager.GetCurrentClassLogger();
-        
-        FileStream fileStream;
-        //FileStream valStream;
 
-        public IntermediateFile(string directory_path, Guid mapperID)
+        FileStream fileStream;
+
+        public FileStream FileStream
         {
-            this.mapperID = mapperID;
+            get { return fileStream; }
+        }
+
+        public IntermediateFile(string directory_path, Guid mapperID, int buffer_size = 4 * 1024 * 1024)
+        {
+            //this.mapperID = mapperID;
             created_files++;
             string file_name = DateTime.Now.ToFileTime().ToString() + "-" + mapperID + "-" + created_files.ToString();
-            //string val_file_name = DateTime.Now.ToFileTime().ToString() + "-values-" + mapperID + "-" + created_files.ToString();
-            fileStream = new FileStream(directory_path + "/" + file_name, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.Read, 4 * 1024 * 1024);            
-            //keyStream = new FileStream(directory_path + "/" + key_file_name, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.Read, 4 * 1024 * 1024);            
+            path = directory_path + "/" + file_name;
+            fileStream = new FileStream(path, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.Read, buffer_size);            
         }
+
+        public void Write(byte[] array)
+        {
+            fileStream.Write(array, 0, array.Length);
+        }
+
+        public int WriteKey(InterKey key)
+        {
+            var key_bytes = Serialization.GetBinarySerializer(typeof(InterKey)).Invoke(key);
+            fileStream.Write(BitConverter.GetBytes(key_bytes.Length), 0, sizeof(int));
+            fileStream.Write(key_bytes, 0, key_bytes.Length);
+            return key_bytes.Length + sizeof(int);
+        }
+
 
         public int WriteRecords(IEnumerable<KeyValuePair<InterKey,List<InterValue>>> sorted_pairs)
         {
@@ -46,9 +63,12 @@ namespace Rhino.IO
 
             foreach (var pair in sorted_pairs)
             {
-                var bytes=IntermediateRecord<InterKey,InterValue>.GetIntermediateRecordBytes(pair.Key,pair.Value);
-                fileStream.Write(bytes, 0, bytes.Length);
-                written_bytes += bytes.Length;
+                var record_bytes=IntermediateRecord<InterKey,InterValue>.GetIntermediateRecordBytes(pair.Key,pair.Value);
+                foreach (var bytes in record_bytes)
+                {
+                    fileStream.Write(bytes, 0, bytes.Length);
+                    written_bytes += bytes.Length;
+                }
             }
 
             watch.Stop();
@@ -57,6 +77,11 @@ namespace Rhino.IO
             if (written_bytes > int.MaxValue)
                 throw new InvalidCastException("The intermediate file is very huge!");
             return (int)written_bytes;
+        }
+
+        public void Close()
+        {
+            fileStream.Close();
         }
 
     }

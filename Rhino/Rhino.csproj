@@ -54,6 +54,7 @@
     <Compile Include="MapRed\MapContext.cs" />
     <Compile Include="MapRed\TextMapper.cs" />
     <Compile Include="MapRed\TextMapperInfo.cs" />
+    <Compile Include="MapRed\TextMapReduce.cs" />
     <Compile Include="Old-2\Alaki.cs" />
     <Compile Include="Old-2\ConcurrentMapCombiner.cs" />
     <Compile Include="Old-2\InputRecordReader.cs" />
@@ -75,6 +76,7 @@
     <Compile Include="IO\TextInputReader.cs" />
     <Compile Include="Util\ArrayUtils.cs" />
     <Compile Include="Util\ParallelSort.cs" />
+    <Compile Include="Util\PQ.cs" />
     <Compile Include="Util\PriorityQueue.cs" />
     <Compile Include="Util\StreamUtils.cs" />
     <Compile Include="Util\StringFormatter.cs" />

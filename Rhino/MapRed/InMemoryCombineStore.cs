@@ -21,7 +21,7 @@ namespace Rhino.MapRed
         int maxIntermediatePairsToSpill = 64 * 1024;
 
         TextMapperInfo mapperInfo;
-        int maxIntermediateFileSize = 256 * 1024 * 1024;
+        int maxIntermediateFileSize = 100 * 1024 * 1024;
 
         string tempDirectory;
         Guid mapperID;
@@ -78,7 +78,8 @@ namespace Rhino.MapRed
                 int written_bytes = 0;
                 written_bytes = inter_file.WriteRecords(sorted_pairs);
                 mapperInfo.SpilledBytes += written_bytes;
-                
+                inter_file.Close();
+
                 if (!final_spill && written_bytes > 0)
                 {
                     if (written_bytes < maxIntermediateFileSize)

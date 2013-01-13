@@ -9,8 +9,11 @@ namespace Rhino.IO.Records
 {
     public class IntermediateRecord<InterKey,InterVal>
     {
-        public static byte[] GetIntermediateRecordBytes(InterKey key, List<InterVal> values)
+        static int maxChunkSize = 4 * 1024 * 1024;
+
+        public static List<byte[]> GetIntermediateRecordBytes(InterKey key, List<InterVal> values)
         {
+            List<byte[]> result=new List<byte[]>();
             var key_serializer = Serialization.GetBinarySerializer(typeof(InterKey));
             var val_serializer = Serialization.GetBinarySerializer(typeof(InterVal));
             
@@ -23,10 +26,21 @@ namespace Rhino.IO.Records
                 var val_bytes = val_serializer.Invoke(val);
                 byte_seq.AddRange(BitConverter.GetBytes(val_bytes.Length));
                 byte_seq.AddRange(val_bytes);
+                if (byte_seq.Count >= maxChunkSize)
+                {
+                    var val_list_bytes = byte_seq.ToArray();
+                    byte_seq.Clear();
+                    result.Add(ArrayUtils.Combine(BitConverter.GetBytes(key_bytes.Length), key_bytes, BitConverter.GetBytes(val_list_bytes.Length), val_list_bytes));
+                }
             }
-            var val_list_bytes=byte_seq.ToArray();
 
-            return ArrayUtils.Combine(BitConverter.GetBytes(key_bytes.Length), key_bytes, BitConverter.GetBytes(val_list_bytes.LongLength), val_list_bytes);           
+            if (byte_seq.Count > 0)
+            {
+                var val_list_bytes = byte_seq.ToArray();
+                result.Add(ArrayUtils.Combine(BitConverter.GetBytes(key_bytes.Length), key_bytes, BitConverter.GetBytes(val_list_bytes.Length), val_list_bytes));
+            }
+
+            return result;            
         }
 
         public static InterKey ReadKey(Stream stream)
@@ -41,31 +55,11 @@ namespace Rhino.IO.Records
         
         public static long ReadValueListLength(Stream stream)
         {
-            var long_bytes = new byte[sizeof(long)];
-            stream.Read(long_bytes, 0, long_bytes.Length);
-            var list_len = BitConverter.ToInt64(long_bytes, 0);
+            var int_bytes = new byte[sizeof(int)];
+            stream.Read(int_bytes, 0, int_bytes.Length);
+            var list_len = BitConverter.ToInt32(int_bytes, 0);
             return list_len;
         }
-
-
-        //private static List<InterVal> readValues(Stream stream)
-        //{
-        //    List<InterVal> list = new List<InterVal>();
-        //    var long_bytes = new byte[sizeof(long)];
-        //    stream.Read(long_bytes, 0, long_bytes.Length);
-        //    var list_len = BitConverter.ToInt32(long_bytes, 0);
-        //    int read_bytes = 0;
-        //    while (read_bytes < list_len)
-        //    {
-        //        var int_bytes = new byte[sizeof(int)];
-        //        read_bytes+= stream.Read(int_bytes, 0, int_bytes.Length);
-        //        var val_len = BitConverter.ToInt32(int_bytes, 0);
-        //        var val_bytes = new byte[val_len];
-        //        read_bytes += stream.Read(val_bytes, 0, val_len);
-        //        list.Add((InterVal)Serialization.GetBinaryDeserializer(typeof(InterVal)).Invoke(val_bytes,0));
-        //    }
-        //    return list;
-        //}
 
     }
 }
