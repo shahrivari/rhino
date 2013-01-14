@@ -57,7 +57,7 @@ namespace Rhino.MapRed
             }
         }
 
-        public void doSpillIfNeeded(bool final_spill = false, int thread_num=-1)
+        public string doSpillIfNeeded(bool final_spill = false, int thread_num=-1)
         {
             if (combinedDictionary.Count > 0 && (intermediatePairCount + combinedDictionary.Count > maxIntermediatePairsToSpill || final_spill))
             {
@@ -93,7 +93,10 @@ namespace Rhino.MapRed
                         logger.Debug("maxIntermediatePairsToSpill was set to {0} records.", StringFormatter.DigitGrouped(maxIntermediatePairsToSpill));
                     }
                 }
+
+                return inter_file.Path;
             }
+            return null;
         }
 
 

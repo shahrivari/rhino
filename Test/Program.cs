@@ -32,20 +32,43 @@ namespace Test
             //var merger = new IntermediateFileMerger<string, int>(@"z:\pashm", new Guid("74e3f516-43fe-475b-900d-811fb2599ec7"));            
             //var last=merger.Merge();
             //Console.WriteLine(last);
+                                    
+            //TextFileInputReader reader = new TextFileInputReader(@"X:\alaki\BIN_NORM_20_40M.csv");
 
-            
+            watch.Restart();
+            FileStream stre = new FileStream(@"z:\large1G.txt", FileMode.Open);
+            var len = stre.Length;
+            var buffer=new byte[1024*1024];
+            var q = new Queue<byte>();
+            var token = new StringBuilder();
+            for (int i = 0; i < len;)
+            {
+                int read = stre.Read(buffer, 0, buffer.Length);
+                i += read;
+                for (int x = 0; x < read; x++)
+                {
+                    char c = (char)buffer[x];
+                    if (c == '\n')
+                    {
+                        var xx = token.ToString(); ;
+                        token.Clear();
+                        continue;
+                    }
+                    token.Append(c);
+                }
+            }
+            watch.Stop();
+            Console.WriteLine(watch.Elapsed);
+            watch.Restart();
+            stre.Close();
 
-
-
-            TextFileInputReader reader = new TextFileInputReader(@"X:\alaki\BIN_NORM_20_40M.csv");
-
-            var mr=new TextMapReduce<string,int>(@"z:\large2.txt",@"z:\pashm");
+            var mr=new TextMapReduce<string,int>(@"z:\large1G.txt",@"z:\pashm");
             mr.MapFunc=(s, context) => 
                 {
                     //foreach (var token in s.Split())
                     //    context.Emit(token, 1);
-                    if(s.Contains("yes"))
-                        context.Emit("length", s.Length);
+                    //if(s.Contains("yes"))
+                    //    context.Emit("length", s.Length);
                     //for (int i = 0; i < 10000; i++);
                 };
  
