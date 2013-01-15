@@ -75,7 +75,7 @@ namespace Rhino.MapRed
                 watch.Stop();
                 logger.Debug("Sorted {0} records in {1}.", StringFormatter.DigitGrouped(sorted_pairs.Count()), watch.Elapsed);
                 IntermediateFile<InterKey, InterValue> inter_file = new IntermediateFile<InterKey, InterValue>(tempDirectory, mapperID);
-                int written_bytes = 0;
+                long written_bytes = 0;
                 written_bytes = inter_file.WriteRecords(sorted_pairs);
                 mapperInfo.SpilledBytes += written_bytes;
                 inter_file.Close();

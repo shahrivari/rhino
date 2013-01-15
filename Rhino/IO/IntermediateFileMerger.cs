@@ -60,16 +60,30 @@ namespace Rhino.IO
                 }
 
                 logger.Debug("Merging {0} files summing to {1} bytes", current_streams.Count, StringFormatter.HumanReadablePostfixs(stream_len.Values.Sum()));
-                
+
+                var last_key = priorityQ.Peek().Key;
+                bool first_time = true;
                 while (priorityQ.Count > 0)
                 {
                     total_records++;
                     var best=priorityQ.Dequeue();
+
+                    if(!first_time)
+                        if (last_key.Equals(best.Key))
+                        {
+                            dest.WriteByte(1);
+                        }
+                        else
+                            dest.WriteByte(0);
+                    last_key = best.Key;
+                    first_time = false;
+
                     destination_file.WriteKey(best.Key);
                     var current_stream = best.Value;
                     var len = IntermediateRecord<InterKey, InterVal>.ReadValueListLength(current_stream);
                     dest.Write(BitConverter.GetBytes(len), 0, sizeof(int));
-                    StreamUtils.Copy(current_stream, dest, len);
+                    StreamUtils.Copy(current_stream, dest, len - sizeof(byte));
+                    current_stream.ReadByte();
 
                     if (best.Value.Position >= stream_len[current_stream])
                         continue;                    

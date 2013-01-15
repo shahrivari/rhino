@@ -49,6 +49,7 @@
     <Compile Include="IO\IntermediateFileMerger.cs" />
     <Compile Include="IO\Records\IntermediateRecord.cs" />
     <Compile Include="IO\Records\SmallRecord.cs" />
+    <Compile Include="IO\ReduceIterator.cs" />
     <Compile Include="IO\Serializer.cs" />
     <Compile Include="MapRed\InMemoryCombineStore.cs" />
     <Compile Include="MapRed\MapContext.cs" />

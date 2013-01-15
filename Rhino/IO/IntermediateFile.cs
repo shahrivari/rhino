@@ -55,11 +55,12 @@ namespace Rhino.IO
         }
 
 
-        public int WriteRecords(IEnumerable<KeyValuePair<InterKey,List<InterValue>>> sorted_pairs)
+        public long WriteRecords(IEnumerable<KeyValuePair<InterKey,List<InterValue>>> sorted_pairs)
         {
             Stopwatch watch = new Stopwatch();
             watch.Start();
             long written_bytes=0;
+            
 
             foreach (var pair in sorted_pairs)
             {
@@ -74,9 +75,9 @@ namespace Rhino.IO
             watch.Stop();
             logger.Debug("Spilled {0} records summing to {2} bytes to disk in {1}.", StringFormatter.DigitGrouped(sorted_pairs.Count()), watch.Elapsed,written_bytes);
 
-            if (written_bytes > int.MaxValue)
-                throw new InvalidCastException("The intermediate file is very huge!");
-            return (int)written_bytes;
+            //if (written_bytes > int.MaxValue)
+            //    throw new InvalidCastException("The intermediate file is very huge!");
+            return written_bytes;
         }
 
         public void Close()
