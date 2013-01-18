@@ -18,9 +18,6 @@ namespace Rhino.IO.Records
             var val_serializer = Serialization.GetBinarySerializer(typeof(InterVal));
             
             var key_bytes = key_serializer.Invoke(key);
-            if (key_bytes.Length == 0)
-                Console.WriteLine("HOOOOOSSSSH");
-
             List<byte> byte_seq = new List<byte>();
 
             int consumed_val = 0;

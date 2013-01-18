@@ -53,9 +53,11 @@
     <Compile Include="IO\Serializer.cs" />
     <Compile Include="MapRed\InMemoryCombineStore.cs" />
     <Compile Include="MapRed\MapContext.cs" />
+    <Compile Include="MapRed\ReduceContext.cs" />
     <Compile Include="MapRed\TextMapper.cs" />
     <Compile Include="MapRed\TextMapperInfo.cs" />
     <Compile Include="MapRed\TextMapReduce.cs" />
+    <Compile Include="MapRed\TextReducer.cs" />
     <Compile Include="Old-2\Alaki.cs" />
     <Compile Include="Old-2\ConcurrentMapCombiner.cs" />
     <Compile Include="Old-2\InputRecordReader.cs" />
