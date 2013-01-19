@@ -6,15 +6,20 @@ using System.IO;
 
 namespace Rhino.IO
 {
-    public class ReduceIterator<InterVal>
+    public class ReduceIterator<InterKey, InterVal>
     {
-        Stream stream;
-        object key;
+        InterKey key;
+        public InterKey Key
+        {
+            get { return key; }
+        }
+
         bool isFinished = false;
         List<InterVal> vals;
         int pos = 0;
 
-        
+        ReduceInputReader<InterKey, InterVal> reader; 
+
         public bool HasMoreItems
         {
             get
@@ -26,18 +31,20 @@ namespace Rhino.IO
             }
         }
 
-        public ReduceIterator(List<InterVal> initial_list, bool last_chunk=true)
+        public ReduceIterator(InterKey key, List<InterVal> initial_list, ReduceInputReader<InterKey,InterVal> reader , byte last_chunk=0)
         {
+            this.key = key;
             AddChunk(initial_list, last_chunk);
+            this.reader = reader;
         }
 
-        public void AddChunk(List<InterVal> initial_list, bool last_chunk = true)
+        public void AddChunk(List<InterVal> initial_list, byte last_chunk = 0)
         {
             if (initial_list == null)
                 throw new InvalidOperationException("Initial list must not be null.");
             vals = initial_list;
             pos = 0;
-            isFinished = last_chunk;
+            isFinished = last_chunk==0;
         }
 
         public InterVal Next()
