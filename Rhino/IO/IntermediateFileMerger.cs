@@ -17,12 +17,19 @@ namespace Rhino.IO
         int concurrentFilesCount = 64;
         int maxMemory = 256 * 1024 * 1024;
         string directory;
+        
+        Guid iD;
+        public Guid ID
+        {
+            get { return iD; }
+        }
 
         string[] files;
 
         public IntermediateFileMerger(string directory, Guid mapperID)
         {
             this.directory = directory;
+            iD = mapperID;
             files=Directory.GetFiles(directory, "*" + mapperID + "*");
             if (files.Length < 1)
                 throw new ArgumentException("There is no files to merge!");
@@ -39,7 +46,7 @@ namespace Rhino.IO
             while (fileQ.Count > 1)
             {
                 watch.Restart();
-                var destination_file = new IntermediateFile<InterKey, InterVal>(directory, Guid.Empty, 2 * memory_per_file);
+                var destination_file = new IntermediateFile<InterKey, InterVal>(directory, ID, 2 * memory_per_file);
                 var dest = destination_file.FileStream;
 
                 var current_streams = new List<FileStream>();
@@ -90,6 +97,7 @@ namespace Rhino.IO
                     var new_key = IntermediateRecord<InterKey, InterVal>.ReadKey(current_stream);
                     priorityQ.Enqueue(new_key, current_stream);
                 }
+                dest.WriteByte(0);
                 dest.Close();
                 fileQ.Enqueue(destination_file.Path);
                 watch.Stop();

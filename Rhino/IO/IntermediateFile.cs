@@ -73,7 +73,7 @@ namespace Rhino.IO
             }
 
             watch.Stop();
-            logger.Debug("Spilled {0} records summing to {2} bytes to disk in {1}.", StringFormatter.DigitGrouped(sorted_pairs.Count()), watch.Elapsed,written_bytes);
+            logger.Debug("Spilled {0} records summing to {2} bytes to disk in {1}.", StringFormatter.DigitGrouped(sorted_pairs.Count()), watch.Elapsed, StringFormatter.HumanReadablePostfixs(written_bytes));
 
             //if (written_bytes > int.MaxValue)
             //    throw new InvalidCastException("The intermediate file is very huge!");

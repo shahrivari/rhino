@@ -18,8 +18,11 @@ namespace Rhino.IO
         public static void RegisterBasicTypes()
         {
             //serializers for basic types
-            binarySerializers.Add(typeof(bool), (val) => { return BitConverter.GetBytes((bool)val).Reverse().ToArray(); });
+            binarySerializers.Add(typeof(bool), (val) => { return BitConverter.GetBytes((bool)val); });
             binaryDeserializers.Add(typeof(bool), (bytes, index) => { return BitConverter.ToBoolean(bytes, index); });
+
+            binarySerializers.Add(typeof(byte), (val) => { return new byte[]{(byte)val}; });
+            binaryDeserializers.Add(typeof(byte), (bytes, index) => { return bytes[0]; });
 
             binarySerializers.Add(typeof(char), (val) => { return BitConverter.GetBytes((char)val); });
             binaryDeserializers.Add(typeof(char), (bytes, index) => { return BitConverter.ToChar(bytes, index); });

@@ -12,22 +12,25 @@ namespace Rhino.IO
         //public delegate List<InterVal> ReadNext(object key);
 
         Stream inputStream;
+        long inputLength;
 
-        InterKey currentKey;
-        InterKey lastKey;
-
+        public bool IsFinished
+        {
+            get 
+            {
+                return inputStream.Position >= inputLength;
+            }
+        }
 
         public ReduceInputReader(string input_path, int buffer_size = 32 * 1024 * 1024)
         {
-            inputStream = new FileStream(input_path, FileMode.Open, FileAccess.Read, FileShare.Read, buffer_size); 
+            inputStream = new FileStream(input_path, FileMode.Open, FileAccess.Read, FileShare.Read, buffer_size);
+            inputLength = inputStream.Length;
         }
 
 
-        public byte ReadNextChunk(object key, out List<InterVal> list)
+        public byte ReadNextChunk(InterKey key, out List<InterVal> list)
         {
-            if (!(key is InterKey))
-                throw new InvalidCastException("Key has another type!!");
-            
             InterKey _key = (InterKey)key;
             var read_key = IntermediateRecord<InterKey, InterVal>.ReadKey(inputStream);
             List<InterVal> vals;
@@ -39,12 +42,12 @@ namespace Rhino.IO
             return last_chunk;
         }
 
-        public ReduceIterator<InterKey,InterVal> GetNextIterator()
+        public ReduceObject<InterKey,InterVal> GetNextReduceObject()
         {
             var read_key = IntermediateRecord<InterKey, InterVal>.ReadKey(inputStream);
             List<InterVal> vals;
             var last_chunk = IntermediateRecord<InterKey, InterVal>.ReadValueList(inputStream, out vals);
-            var iterator = new ReduceIterator<InterKey,InterVal>(read_key,vals,this,last_chunk);
+            var iterator = new ReduceObject<InterKey,InterVal>(read_key,vals,this,last_chunk);
             
             return iterator;
         }
