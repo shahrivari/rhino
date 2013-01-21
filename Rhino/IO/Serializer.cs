@@ -98,7 +98,7 @@ namespace Rhino.IO
                 //stream.Write(small_record.Bytes, 0, small_record.Bytes.Length);
             }
 
-            var result = ArrayUtils.Combine(BitConverter.GetBytes(byte_seq.Count), byte_seq.ToArray());
+            var result = ArrayUtils.Concat(BitConverter.GetBytes(byte_seq.Count), byte_seq.ToArray());
             return result;
             //return new SmallRecord(stream.ToArray());
         }

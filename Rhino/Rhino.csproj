@@ -82,7 +82,6 @@
     <Compile Include="IO\TextFileInputReader.cs" />
     <Compile Include="IO\TextInputReader.cs" />
     <Compile Include="Util\ArrayUtils.cs" />
-    <Compile Include="Util\ParallelSort.cs" />
     <Compile Include="Util\PQ.cs" />
     <Compile Include="Util\PriorityQueue.cs" />
     <Compile Include="Util\StreamUtils.cs" />
