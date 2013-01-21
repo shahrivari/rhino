@@ -84,8 +84,9 @@ namespace Rhino.IO.Records
             {
                 read_bytes += stream.Read(record_len_bytes, 0, record_len_bytes.Length);
                 record_len = BitConverter.ToInt32(record_len_bytes, 0);
-                if (record_len > record_buffer.Length)
-                    record_buffer = new byte[record_len];
+                //if (record_len > record_buffer.Length)
+                //    record_buffer = new byte[record_len];
+                record_buffer = new byte[record_len];
                 read_bytes += stream.Read(record_buffer, 0, record_len);
                 value = (InterVal)val_deserilaizer.Invoke(record_buffer,0);
                 values.Add(value);

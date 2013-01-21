@@ -7,6 +7,7 @@ using System.Threading;
 using Rhino;
 using Rhino.IO;
 using Rhino.IO.Records;
+using Rhino.IO.Pesudo;
 using Rhino.MapRed;
 using System.Text.RegularExpressions;
 
@@ -58,26 +59,35 @@ namespace Test
             //    }
             //}
 
-
-            var reader = new RandomIntegerReader(1000*1000*5);
-            
-            var mr = new TextMapReduce<int, Int16>(reader, @"z:\pashm");
+            var reader = new TextFileLineByLineReader(@"Z:\ClueWeb09_WG_50m.graph-txt", 1, 1000 * 1000 );
+            reader.PrepenLineNumber = true;
+           
+            var mr = new TextMapReduce<string , string>(reader, @"z:\pashm");
             mr.MapFunc = (s, context) =>
             {
-                int x = Int32.Parse(s);
-                context.Emit(x, 1);
+                var split = s.Split();
+                long id = long.Parse(split[0]) - 1;
+                for (int i = 1; i < split.Length; i++)
+                    if(!string.IsNullOrEmpty(split[i]))
+                        context.Emit(split[i], id.ToString());
             };
 
             //mr.CombineFunc = (list) => { return list.Sum(); };
             mr.ReduceFunc = (reduce_obj, reduce_context) =>
             {
-                long sum = 0;
-                while (reduce_obj.HasMoreItems)
-                    sum += reduce_obj.Next();
-                reduce_context.Emit(reduce_obj.Key + " : " + sum);
+                var all = reduce_obj.ReadAll();
+                StringBuilder builder = new StringBuilder();
+                builder.Append(reduce_obj.Key);
+                builder.Append(": ");
+                foreach (var s in all)
+                {
+                    builder.Append(s);
+                    builder.Append(", ");
+                }
+                reduce_context.Emit(builder.ToString());
             };
 
-            mr.Run();
+            mr.Run(1);
 
             //var reader = new TextFileInputReader(@"z:\large.txt");
             //var mr=new TextMapReduce<string,int>(reader,@"z:\pashm");

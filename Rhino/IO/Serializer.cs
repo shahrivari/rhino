@@ -47,8 +47,6 @@ namespace Rhino.IO
                 string str = (string)val;
                 byte[] bytes = new byte[str.Length * sizeof(char)];
                 System.Buffer.BlockCopy(str.ToCharArray(), 0, bytes, 0, bytes.Length);
-                if (bytes.Length == 0)
-                    Console.WriteLine("PASHM!");
                 return bytes;
             });
             binaryDeserializers.Add(typeof(string), (bytes, index) =>

@@ -15,20 +15,24 @@ namespace Rhino.MapRed
         TextMapper<InterKey, InterValue> mapper;
         IntermediateFileMerger<InterKey, InterValue> merger;
         TextReducer<InterKey, InterValue> reducer;
+        TextInputReader inputReader;
 
+        Action<string, MapContext<InterKey, InterValue>> mapFunc;
         public Action<string, MapContext<InterKey, InterValue>> MapFunc
         {
-            set { mapper.MapFunc = value; }
+            set { mapFunc = value; }
         }
 
+        Func<List<InterValue>, InterValue> combineFunc;
         public Func<List<InterValue>, InterValue> CombineFunc
         {
-            set { mapper.CombineFunc = value; }
+            set { combineFunc = value; }
         }
 
+        Action<ReduceObject<InterKey, InterValue>, ReduceContext> reduceFunc;
         public Action<ReduceObject<InterKey,InterValue>, ReduceContext> ReduceFunc
         {
-            set { reducer.ReduceFunc = value; }
+            set { reduceFunc = value; }
         }
 
 
@@ -36,19 +40,23 @@ namespace Rhino.MapRed
         public TextMapReduce(TextInputReader input_reader, string working_dir)
         {
             workingDirectory = working_dir;
-            mapper = new TextMapper<InterKey, InterValue>(input_reader,workingDirectory);
-            reducer = new TextReducer<InterKey, InterValue>("", workingDirectory, mapper.MapperID);
+            inputReader = input_reader;
         }
 
+        
         public void Run(int thread_num=0)
         {
+            mapper = new TextMapper<InterKey, InterValue>(inputReader, workingDirectory);
+            mapper.MapFunc = mapFunc;
+            mapper.CombineFunc = combineFunc;
             mapper.SequentialRun(thread_num);
+            
             merger = new IntermediateFileMerger<InterKey, InterValue>(workingDirectory, mapper.MapperID);
             var last_file = merger.Merge();
             logger.Info("Merged to {0}", last_file);
-            var new_reducer = new TextReducer<InterKey, InterValue>(last_file, workingDirectory, mapper.MapperID);
-            new_reducer.ReduceFunc = reducer.ReduceFunc;
-            reducer = new_reducer;
+
+            reducer = new TextReducer<InterKey, InterValue>(last_file, workingDirectory, mapper.MapperID);
+            reducer.ReduceFunc = reduceFunc;
             reducer.Reduce();            
         }
 

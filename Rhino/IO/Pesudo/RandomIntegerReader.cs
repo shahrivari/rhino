@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Rhino.IO
+namespace Rhino.IO.Pesudo
 {
     public class RandomIntegerReader:TextInputReader
     {
@@ -31,8 +31,7 @@ namespace Rhino.IO
             if (consumed >= max)
                 return null;
             consumed++;
-            return consumed.ToString();
-            //return rand.Next().ToString();            
+            return rand.Next().ToString();            
         }
 
         public override List<string> ReadRecords(int count)

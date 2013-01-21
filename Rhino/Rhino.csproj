@@ -47,12 +47,14 @@
     <Compile Include="IO\InputTextCunk.cs" />
     <Compile Include="IO\IntermediateFile.cs" />
     <Compile Include="IO\IntermediateFileMerger.cs" />
-    <Compile Include="IO\RandomIntegerReader.cs" />
+    <Compile Include="IO\Pesudo\RandomIntegerReader.cs" />
+    <Compile Include="IO\Pesudo\SequenceGenerator.cs" />
     <Compile Include="IO\Records\IntermediateRecord.cs" />
     <Compile Include="IO\Records\SmallRecord.cs" />
     <Compile Include="IO\ReduceInputReader.cs" />
     <Compile Include="IO\ReduceObject.cs" />
     <Compile Include="IO\Serializer.cs" />
+    <Compile Include="IO\TextFileLineByLineReader.cs" />
     <Compile Include="MapRed\InMemoryCombineStore.cs" />
     <Compile Include="MapRed\MapContext.cs" />
     <Compile Include="MapRed\ReduceContext.cs" />

@@ -69,6 +69,14 @@ namespace Rhino.IO
                 }
             }
         }
+
+        public List<InterVal> ReadAll()
+        {
+            var list=new List<InterVal>();
+            while (HasMoreItems)
+                list.Add(Next());
+            return list;
+        }
         
     }
 }
