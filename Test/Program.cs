@@ -59,17 +59,18 @@ namespace Test
             //    }
             //}
 
-            var reader = new TextFileLineByLineReader(@"Z:\ClueWeb09_WG_50m.graph-txt", 1, 1000 * 1000 );
-            reader.PrepenLineNumber = true;
+            var reader = new TextFileLineByLineReader(@"Z:\ClueWeb09_WG_50m.graph-txt", 1 );
+            reader.PrependLineNumber = true;
+            //reader.LinesPerRecord = 100;
            
             var mr = new TextMapReduce<string , string>(reader, @"z:\pashm");
             mr.MapFunc = (s, context) =>
             {
-                var split = s.Split();
-                long id = long.Parse(split[0]) - 1;
-                for (int i = 1; i < split.Length; i++)
-                    if(!string.IsNullOrEmpty(split[i]))
-                        context.Emit(split[i], id.ToString());
+                //var split = s.Split();
+                //long id = long.Parse(split[0]) - 1;
+                //for (int i = 1; i < split.Length; i++)
+                //    if(!string.IsNullOrEmpty(split[i]))
+                //        context.Emit(split[i], id.ToString());
             };
 
             //mr.CombineFunc = (list) => { return list.Sum(); };

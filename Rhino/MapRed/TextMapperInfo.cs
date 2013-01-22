@@ -5,6 +5,9 @@ using System.Text;
 
 namespace Rhino.MapRed
 {
+    /// <summary>
+    /// Contains information about the map phase.
+    /// </summary>
     public class TextMapperInfo
     {
         public long MapEmits = 0;

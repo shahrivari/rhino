@@ -10,7 +10,12 @@ using NLog;
 
 namespace Rhino.MapRed
 {
-    public class TextReducer <InterKey,InterVal>
+    /// <summary>
+    /// Represents the reducer class
+    /// </summary>
+    /// <typeparam name="InterKey">type of intermediate keys</typeparam>
+    /// <typeparam name="InterVal">type of the intermediate values</typeparam>
+    class TextReducer <InterKey,InterVal>
     {
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -21,19 +26,30 @@ namespace Rhino.MapRed
         string outputFileName;
 
         Guid reducerID;
+        /// <summary>
+        /// the ID of the reducer.
+        /// </summary>
         public Guid ReducerID
         {
             get { return reducerID; }
         }
 
         private Action<ReduceObject<InterKey, InterVal> , ReduceContext> reduceFunc = null;
+        /// <summary>
+        /// the function used for reducing the intermediate data
+        /// </summary>
         public Action<ReduceObject<InterKey, InterVal>, ReduceContext> ReduceFunc
         {
             get { return reduceFunc; }
             set { reduceFunc = value; }
         }
 
-
+        /// <summary>
+        /// the constructor
+        /// </summary>
+        /// <param name="input_path">path of the cumolative input intermedate file containing the merged intermediate data.</param>
+        /// <param name="output_dir">the output directory for storing the output data</param>
+        /// <param name="id">ID of the mapper</param>
         public TextReducer(string input_path, string output_dir, Guid id=default(Guid))
         {
             inputPath=input_path;
@@ -43,6 +59,9 @@ namespace Rhino.MapRed
             outputStream = new StreamWriter(output_dir+"/"+outputFileName, false, Encoding.UTF8, bufferSize);
         }
 
+        /// <summary>
+        /// performs the reduce phase
+        /// </summary>
         public void Reduce()
         {
             if (reduceFunc == null)

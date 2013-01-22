@@ -13,9 +13,17 @@ using Rhino.Util;
 
 namespace Rhino.MapRed
 {
-    public class TextMapper<InterKey, InterValue>
+    /// <summary>
+    /// Maps string records and emits some keys and values.
+    /// </summary>
+    /// <typeparam name="InterKey">type of the keys to be emitted</typeparam>
+    /// <typeparam name="InterValue">type of the values to be emitted</typeparam>
+    class TextMapper<InterKey, InterValue>
     {
         private Action<string, MapContext<InterKey, InterValue>> mapFunc = null;
+        /// <summary>
+        /// Gets or sets the map function.
+        /// </summary>
         public Action<string, MapContext<InterKey, InterValue>> MapFunc
         {
             get { return mapFunc; }
@@ -23,7 +31,9 @@ namespace Rhino.MapRed
         }
 
         private Func<List<InterValue>, InterValue> combineFunc = null;
-
+        /// <summary>
+        /// Gets or sets the combiner function.
+        /// </summary>
         public Func<List<InterValue>, InterValue> CombineFunc
         {
             get { return combineFunc; }
@@ -34,6 +44,9 @@ namespace Rhino.MapRed
         private Object diskLock=new object();
         
         private Guid mapperID;
+        /// <summary>
+        /// Gets the ID of mapper.
+        /// </summary>
         public Guid MapperID
         {
             get { return mapperID; }
@@ -51,6 +64,9 @@ namespace Rhino.MapRed
         private static Logger logger = LogManager.GetCurrentClassLogger();
         
         TextMapperInfo mapperInfo = new TextMapperInfo();
+        /// <summary>
+        /// Gets the mapper information object.
+        /// </summary>
         public TextMapperInfo MapperInfo
         {
             get { return mapperInfo; }
@@ -59,6 +75,13 @@ namespace Rhino.MapRed
         BlockingCollection<Dictionary<InterKey, List<InterValue>>> dicsQ = new BlockingCollection<Dictionary<InterKey, List<InterValue>>>(100);
         BlockingCollection<InputTextCunk> inputQ = new BlockingCollection<InputTextCunk>(4);
 
+        /// <summary>
+        /// the constructor
+        /// </summary>
+        /// <param name="reader">reader that reads input of the mapper</param>
+        /// <param name="working_directory">the directory to store the intremediate files.</param>
+        /// <param name="map_func">the function to be used as the map</param>
+        /// <param name="combine_func">the function to be used for combining intermediate values</param>
         public TextMapper(TextInputReader reader, string working_directory, Action<string, MapContext<InterKey, InterValue>> map_func=null, Func<List<InterValue>, InterValue> combine_func = null)
         {
             this.reader = reader;
@@ -169,7 +192,10 @@ namespace Rhino.MapRed
             logger.Info("Mapper spilled {0} records that sums to {1} bytes.", StringFormatter.DigitGrouped(mapperInfo.SpilledRecords), StringFormatter.HumanReadablePostfixs(mapperInfo.SpilledBytes));
         }
 
-        
+        /// <summary>
+        /// Run the mapper using a concurrent and asynchnorous manner
+        /// </summary>
+        /// <param name="thread_num">number of threads to use</param>
         public void Run(int thread_num=0)
         {
             init();
@@ -188,6 +214,11 @@ namespace Rhino.MapRed
             logCompletionInfo();
         }
 
+        /// <summary>
+        /// Run the mapper in a sequential flow. e.g. first read a chunk, map it and then add to combine-store.
+        /// All of the process is done step bye step,. However, each step is done using parallelism facilities but steps are done in order.
+        /// </summary>
+        /// <param name="thread_num">number of threads to be used</param>
         public void SequentialRun(int thread_num = 0)
         {
             init();
@@ -205,7 +236,6 @@ namespace Rhino.MapRed
                 var dics=doMap(input_chunk,thread_num);
                 foreach (var dic in dics)
                 {
-                    //doCombine(dic);
                     combineStore.Add(dic);
                     combineStore.doSpillIfNeeded(false,thread_num);
                 }                

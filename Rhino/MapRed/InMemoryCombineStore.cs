@@ -9,6 +9,12 @@ using Rhino.Util;
 
 namespace Rhino.MapRed
 {
+    /// <summary>
+    /// An In-Memory storage that combines maps emitions.
+    /// It also performs the combine function on value lists if defined.
+    /// </summary>
+    /// <typeparam name="InterKey">the type of intermediate key</typeparam>
+    /// <typeparam name="InterValue">the type of intermediate values</typeparam>
     class InMemoryCombineStore<InterKey, InterValue>
     {
         private static Logger logger = LogManager.GetCurrentClassLogger();
@@ -26,6 +32,13 @@ namespace Rhino.MapRed
         string tempDirectory;
         Guid mapperID;
 
+        /// <summary>
+        /// The constructor for In-Memory combiner
+        /// </summary>
+        /// <param name="mapper_id">the ID of the mapper</param>
+        /// <param name="mapper_info">the info object for the mapper</param>
+        /// <param name="tmp_dir">the temporary directory used for storing intermediate files</param>
+        /// <param name="combine_func">the combiner function used for combining values list</param>
         public InMemoryCombineStore(Guid mapper_id, TextMapperInfo mapper_info, string tmp_dir, Func<List<InterValue>, InterValue> combine_func = null)
         {
             mapperID = mapper_id;
@@ -34,6 +47,10 @@ namespace Rhino.MapRed
             combineFunc = combine_func;
         }
 
+        /// <summary>
+        /// Adds the result of a mapper to the store
+        /// </summary>
+        /// <param name="dic">the dictionary containing the result of a mapper</param>
         public void Add(Dictionary<InterKey, List<InterValue>> dic)
         {
             foreach (var pair in dic)
@@ -57,6 +74,13 @@ namespace Rhino.MapRed
             }
         }
 
+        /// <summary>
+        /// Spills the In-Memory store to the disk if needed.
+        /// The spill condition is dependant on the combine store's content volume and maximum intermediate pairs to spill.
+        /// </summary>
+        /// <param name="final_spill">is this the final spill? means data must be spilled even if there is a little data</param>
+        /// <param name="thread_num">number of threads to use for soritng. The default is to use all cores.</param>
+        /// <returns>a string containing the name of resulted file.</returns>
         public string doSpillIfNeeded(bool final_spill = false, int thread_num=-1)
         {
             if (combinedDictionary.Count > 0 && (intermediatePairCount + combinedDictionary.Count > maxIntermediatePairsToSpill || final_spill))

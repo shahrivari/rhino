@@ -15,11 +15,23 @@ namespace Rhino.IO
         long maxLines = -1;
 
         long lineNumber = 0;
-        bool prepenLineNumber=false;
-        public bool PrepenLineNumber
+        bool prependLineNumber=false;
+        public bool PrependLineNumber
         {
-          get { return prepenLineNumber; }
-          set { prepenLineNumber = value; }
+          get { return prependLineNumber; }
+          set { prependLineNumber = value; }
+        }
+
+        int linesPerRecord = 1;
+        public int LinesPerRecord
+        {
+            get { return linesPerRecord; }
+            set 
+            {
+                if (value <= 0)
+                    throw new ArgumentException("Value must be greater than zero!");
+                linesPerRecord = value; 
+            }
         }
 
         public override long Length
@@ -38,8 +50,9 @@ namespace Rhino.IO
             }
         }
 
-        public TextFileLineByLineReader(string file_path, long skip_lines=-1, long max_lines=-1)
+        public TextFileLineByLineReader(string file_path, long skip_lines=-1, int lines_per_record=1, long max_lines=-1)
         {
+            linesPerRecord = lines_per_record;
             maxLines = max_lines;
             filePath = file_path;
             reader = File.OpenText(filePath);
@@ -55,14 +68,34 @@ namespace Rhino.IO
         {
             if (maxLines != -1 && maxLines <= lineNumber)
                 return null;
-            var line=reader.ReadLine();
-            if (line == null)
-                return null;
-            if(prepenLineNumber)
-                line = lineNumber.ToString() + " " + line;
-            lineNumber++;
-            
-            return line;
+            if (LinesPerRecord == 1)
+            {
+                var line = reader.ReadLine();
+                if (line == null)
+                    return null;
+                if (prependLineNumber)
+                    line = lineNumber.ToString() + " " + line;
+                lineNumber++;
+                return line;
+            }
+            else
+            {
+                StringBuilder builder = new StringBuilder();
+                for (int i = 0; i < linesPerRecord; i++)
+                {
+                    var line = reader.ReadLine();
+                    if (line == null)
+                        if (i == 0)
+                            return null;
+                        else
+                            break;
+                    if (prependLineNumber)
+                        line = lineNumber.ToString() + " " + line;
+                    lineNumber++;
+                    builder.AppendLine(line);
+                }
+                return builder.ToString();
+            }
         }
 
         public override List<string> ReadRecords(int count)
