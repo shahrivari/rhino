@@ -20,7 +20,7 @@ namespace Test
             var watch = new System.Diagnostics.Stopwatch();
             watch.Start();
 
-            Serialization.RegisterBasicTypes();
+            //Serialization.RegisterBasicTypes();
             //var stream = new FileStream(@"Z:\pashm\130024591953953781-00000000-0000-0000-0000-000000000000-2", FileMode.Open);
             //while (stream.Position < stream.Length)
             //{

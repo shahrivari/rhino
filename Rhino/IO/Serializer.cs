@@ -13,9 +13,12 @@ namespace Rhino.IO
         static Dictionary<Type, Func<object, byte[]>> binarySerializers = new Dictionary<Type, Func<object, byte[]>>();
         static Dictionary<Type, Func<byte[],int, object>> binaryDeserializers = new Dictionary<Type, Func<byte[],int, object>>();
 
+        static Serialization()
+        {
+            RegisterBasicTypes();
+        }
 
-
-        public static void RegisterBasicTypes()
+        static void RegisterBasicTypes()
         {
             //serializers for basic types
             binarySerializers.Add(typeof(bool), (val) => { return BitConverter.GetBytes((bool)val); });

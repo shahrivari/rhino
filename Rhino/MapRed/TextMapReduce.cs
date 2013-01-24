@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NLog;
-
+using System.Diagnostics;
 using Rhino.IO;
 using Rhino.IO.Records;
 
@@ -69,6 +69,8 @@ namespace Rhino.MapRed
         /// <param name="thread_num">number of threads to use.</param>
         public void Run(int thread_num=0)
         {
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
             mapper = new TextMapper<InterKey, InterValue>(inputReader, workingDirectory);
             mapper.MapFunc = mapFunc;
             mapper.CombineFunc = combineFunc;
@@ -80,7 +82,9 @@ namespace Rhino.MapRed
 
             reducer = new TextReducer<InterKey, InterValue>(last_file, workingDirectory, mapper.MapperID);
             reducer.ReduceFunc = reduceFunc;
-            reducer.Reduce();            
+            reducer.Reduce();
+            watch.Stop();
+            logger.Info("Job took {0}.", watch.Elapsed);
         }
 
 
