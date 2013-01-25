@@ -21,12 +21,12 @@ namespace PiTest
             var mr = new TextMapReduce<string, long>(reader, @"z:\pashm");
             mr.MapFunc = (s, context) =>
             {
-                var rand = new Random();
+                var random = new Random();
                 long num = 0;
                 for (int i = 0; i < each; i++)
                 {
-                    var x = rand.NextDouble();
-                    var y = rand.NextDouble();
+                    var x = random.NextDouble();
+                    var y = random.NextDouble();
                     if(x*x+y*y<1)
                         num++;
                 }
@@ -44,7 +44,7 @@ namespace PiTest
             mr.Run();
 
             watch.Stop();
-            Console.WriteLine("Took: " + watch.Elapsed);
+            Console.WriteLine("Pi estimation Took: " + watch.Elapsed);
         }
     }
 }

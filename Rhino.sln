@@ -9,7 +9,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lab", "Lab\Lab.csproj", "{3
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphTest", "GraphTest\GraphTest.csproj", "{2571F633-D2F0-44C5-8401-98B31F747442}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PiTest", "PiTest\PiTest.csproj", "{D3D4B1AE-5657-4C92-88BA-938F9A7B6730}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PiExample", "PiTest\PiExample.csproj", "{D3D4B1AE-5657-4C92-88BA-938F9A7B6730}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{83ABE9CF-B446-453A-89AE-F01FC6F2B36E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -82,5 +84,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2571F633-D2F0-44C5-8401-98B31F747442} = {83ABE9CF-B446-453A-89AE-F01FC6F2B36E}
+		{D3D4B1AE-5657-4C92-88BA-938F9A7B6730} = {83ABE9CF-B446-453A-89AE-F01FC6F2B36E}
 	EndGlobalSection
 EndGlobal
