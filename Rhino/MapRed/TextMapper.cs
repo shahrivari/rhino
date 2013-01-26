@@ -27,7 +27,13 @@ namespace Rhino.MapRed
         public Action<string, MapContext<InterKey, InterValue>> MapFunc
         {
             get { return mapFunc; }
-            set { mapFunc = value; }
+            set 
+            {
+                if (!isRunning)
+                    mapFunc = value;
+                else
+                    throw new InvalidOperationException("The Mapper is running!");
+            }
         }
 
         private Func<List<InterValue>, InterValue> combineFunc = null;
@@ -37,7 +43,14 @@ namespace Rhino.MapRed
         public Func<List<InterValue>, InterValue> CombineFunc
         {
             get { return combineFunc; }
-            set { combineFunc = value; }
+            set 
+            {
+                if (!isRunning)
+                    combineFunc = value;
+                else
+                    throw new InvalidOperationException("The Mapper is running!");
+
+            }
         }
 
         protected TextInputReader reader;
@@ -52,8 +65,9 @@ namespace Rhino.MapRed
             get { return mapperID; }
         }
 
-        private string workingDirectory = @"z:\pashm";
-        
+        private bool isRunning = false;
+
+        private string workingDirectory = @"z:\pashm";        
         protected int maxChunkSize = 64 * 1024;
         TimeSpan minWorkPeriod = new TimeSpan(0, 0, 0, 0, 100);
         TimeSpan maxWorkPeriod = new TimeSpan(0, 0, 0, 0, 250);
@@ -196,7 +210,7 @@ namespace Rhino.MapRed
         /// Run the mapper using a concurrent and asynchnorous manner
         /// </summary>
         /// <param name="thread_num">number of threads to use</param>
-        public void Run(int thread_num=0)
+        private void Run(int thread_num=0)
         {
             init();
             mapperWatch.Restart();
@@ -221,6 +235,7 @@ namespace Rhino.MapRed
         /// <param name="thread_num">number of threads to be used</param>
         public void SequentialRun(int thread_num = 0)
         {
+            isRunning = true;
             init();
             mapperWatch.Start();
             while (true)
@@ -243,6 +258,7 @@ namespace Rhino.MapRed
             combineStore.doSpillIfNeeded(true,thread_num);
             mapperWatch.Stop();
             logCompletionInfo();
+            isRunning = false;
         }
     }
 }

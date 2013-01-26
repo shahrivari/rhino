@@ -36,7 +36,7 @@ namespace Rhino.IO
 
         }
 
-        public string Merge()
+        public string Merge(bool keep_files=false)
         {
             int memory_per_file = maxMemory / (concurrentFilesCount+2);
             var fileQ=new Queue<string>(files);
@@ -100,6 +100,11 @@ namespace Rhino.IO
                 dest.WriteByte(0);
                 dest.Close();
                 fileQ.Enqueue(destination_file.Path);
+                foreach (var stream in current_streams)
+                {
+                    stream.Close();
+                    File.Delete(stream.Name);
+                }
                 watch.Stop();
                 logger.Debug("Merged {0} records to {1} in {2}.", StringFormatter.DigitGrouped(total_records), destination_file.Path, watch.Elapsed);
             }

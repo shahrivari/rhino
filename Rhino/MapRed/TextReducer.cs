@@ -24,6 +24,7 @@ namespace Rhino.MapRed
         int bufferSize = 32 * 1024 * 1024;
         string outputDirectory;
         string outputFileName;
+        private bool isRunning=false;
 
         Guid reducerID;
         /// <summary>
@@ -36,12 +37,19 @@ namespace Rhino.MapRed
 
         private Action<ReduceObject<InterKey, InterVal> , ReduceContext> reduceFunc = null;
         /// <summary>
-        /// the function used for reducing the intermediate data
+        /// sets or gets the function used for reducing the intermediate data
         /// </summary>
         public Action<ReduceObject<InterKey, InterVal>, ReduceContext> ReduceFunc
         {
             get { return reduceFunc; }
-            set { reduceFunc = value; }
+            set 
+            {
+                if (!isRunning)
+                    reduceFunc = value;
+                else
+                    throw new InvalidOperationException("Reducer is running!");
+                
+            }
         }
 
         /// <summary>
@@ -67,6 +75,7 @@ namespace Rhino.MapRed
             if (reduceFunc == null)
                 throw new InvalidOperationException("Reduce function is not defined!");
 
+            isRunning = true;
             logger.Info("Reducing final file: {0}", inputPath);
 
             var reader = new ReduceInputReader<InterKey, InterVal>(inputPath, bufferSize);
@@ -79,6 +88,7 @@ namespace Rhino.MapRed
             logger.Info("Reducer emitted {0} records.", StringFormatter.DigitGrouped(reduce_context.EmitCount));
             logger.Info("Reducer output: {0}.", outputFileName);
             outputStream.Close();
+            isRunning = false;
         }
     }
 }

@@ -63,7 +63,7 @@ namespace Test
             reader.PrependLineNumber = true;
             //reader.LinesPerRecord = 100;
            
-            var mr = new TextMapReduce<string , string>(reader, @"z:\pashm");
+            var mr = new TextMapReduce<string , int>(reader, @"z:\pashm");
             mr.MapFunc = (s, context) =>
             {
                 //var split = s.Split();
@@ -71,6 +71,7 @@ namespace Test
                 //for (int i = 1; i < split.Length; i++)
                 //    if(!string.IsNullOrEmpty(split[i]))
                 //        context.Emit(split[i], id.ToString());
+                context.Emit("len", s.Length);
             };
 
             //mr.CombineFunc = (list) => { return list.Sum(); };
