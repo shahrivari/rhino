@@ -59,63 +59,65 @@ namespace Test
             //    }
             //}
 
-            var reader = new TextFileLineByLineReader(@"Z:\ClueWeb09_WG_50m.graph-txt", 1 );
-            reader.PrependLineNumber = true;
-            //reader.LinesPerRecord = 100;
+            //var reader = new TextFileLineByLineReader(@"Z:\ClueWeb09_WG_50m.graph-txt", 1 );
+            //reader.PrependLineNumber = true;
+            ////reader.LinesPerRecord = 100;
            
-            var mr = new TextMapReduce<string , int>(reader, @"z:\pashm");
-            mr.MapFunc = (s, context) =>
-            {
-                //var split = s.Split();
-                //long id = long.Parse(split[0]) - 1;
-                //for (int i = 1; i < split.Length; i++)
-                //    if(!string.IsNullOrEmpty(split[i]))
-                //        context.Emit(split[i], id.ToString());
-                context.Emit("len", s.Length);
-            };
+            //var mr = new TextMapReduce<string , int>(reader, @"z:\pashm");
+            //mr.MapFunc = (s, context) =>
+            //{
+            //    //var split = s.Split();
+            //    //long id = long.Parse(split[0]) - 1;
+            //    //for (int i = 1; i < split.Length; i++)
+            //    //    if(!string.IsNullOrEmpty(split[i]))
+            //    //        context.Emit(split[i], id.ToString());
+            //    context.Emit("len", s.Length);
+            //};
 
-            //mr.CombineFunc = (list) => { return list.Sum(); };
-            mr.ReduceFunc = (reduce_obj, reduce_context) =>
-            {
-                var all = reduce_obj.ReadAll();
-                StringBuilder builder = new StringBuilder();
-                builder.Append(reduce_obj.Key);
-                builder.Append(": ");
-                foreach (var s in all)
-                {
-                    builder.Append(s);
-                    builder.Append(", ");
-                }
-                reduce_context.Emit(builder.ToString());
-            };
-
-            mr.Run(1);
-
-            //var reader = new TextFileInputReader(@"z:\large.txt");
-            //var mr=new TextMapReduce<string,int>(reader,@"z:\pashm");
-            //mr.MapFunc=(s, context) => 
-            //    {
-            //        string s1 = Regex.Replace(s, "[^a-zA-Z0-9 -]", "");
-            //        foreach (var token in s1.Split())
-            //        {
-            //            if (token.Length > 2)
-            //                context.Emit(token.ToLower(), 1);
-            //        }
-            //        //if(s.Contains("yes"))
-            //        //    context.Emit("length", s.Length);
-            //        //for (int i = 0; i < 10000; i++);
-            //    };
- 
-            //mr.CombineFunc=(list) => { return list.Sum(); };
+            ////mr.CombineFunc = (list) => { return list.Sum(); };
             //mr.ReduceFunc = (reduce_obj, reduce_context) =>
             //{
-            //    long sum = 0;
-            //    while (reduce_obj.HasMoreItems)
-            //        sum += reduce_obj.Next();
-            //    reduce_context.Emit(reduce_obj.Key + " : " + sum.ToString());
+            //    var all = reduce_obj.ReadAll();
+            //    StringBuilder builder = new StringBuilder();
+            //    builder.Append(reduce_obj.Key);
+            //    builder.Append(": ");
+            //    foreach (var s in all)
+            //    {
+            //        builder.Append(s);
+            //        builder.Append(", ");
+            //    }
+            //    reduce_context.Emit(builder.ToString());
             //};
 
             //mr.Run(1);
+
+            var reader = new TextFileLineByLineReader(@"z:\large.txt");
+            reader.LinesPerRecord = 10000;
+            var mr = new TextMapReduce<string, int>(reader, @"z:\pashm");
+            mr.MapFunc = (s, context) =>
+                {
+                    //string s1 = Regex.Replace(s, "[^a-zA-Z0-9 -]", "");
+                    s = s.ToLower();
+                    foreach (var token in s.Split())
+                    {
+                        if (token.Length > 1)
+                            context.Emit(token, 1);
+                    }
+                    //if(s.Contains("yes"))
+                    //    context.Emit("length", s.Length);
+                    //for (int i = 0; i < 10000; i++);
+                };
+
+            mr.CombineFunc = (list) => { return list.Sum(); };
+            mr.ReduceFunc = (reduce_obj, reduce_context) =>
+            {
+                long sum = 0;
+                while (reduce_obj.HasMoreItems)
+                    sum += reduce_obj.Next();
+                reduce_context.Emit(reduce_obj.Key + " : " + sum.ToString());
+            };
+
+            mr.Run();
 
             //TextFileInputReader reader = new TextFileInputReader(@"z:\large.txt");
             //var mapper = new TextMapper<string, int>(reader, 
